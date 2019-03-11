@@ -33,6 +33,9 @@ type menuItem struct {
 type MenuList struct {
 	Tx float64  // x translation of the menu
 	Ty float64  // y translation of the menu
+	Offx float64 // x offset of subsequent menu items
+	Offy float64 // y offset of subsequent menu items
+
 	BaseColour     *color.NRGBA // default unselected colour
 	SelectedColour *color.NRGBA // colour used when button is selected
 	SelectedIndex  *int         // index of the item in list which is selected
@@ -40,12 +43,14 @@ type MenuList struct {
 }
 
 //NewMenu creates a new menu
-func NewMenu(tx float64, ty float64, basecolour *color.NRGBA, selectedColour *color.NRGBA, MenuItems []menuItem) MenuList {
+func NewMenu(tx float64, ty float64, offx float64, offy float64, basecolour *color.NRGBA, selectedColour *color.NRGBA, MenuItems []menuItem) MenuList {
 	defaultSelectedIndex := 0
 
 	ml := MenuList{
 		Tx : tx,
 		Ty : ty,
+		Offx: offx,
+		Offy: offy,
 		BaseColour:     basecolour,
 		SelectedColour: selectedColour,
 		SelectedIndex:  &defaultSelectedIndex,
@@ -104,7 +109,7 @@ func (m *MenuList) Draw(screen *ebiten.Image) {
 
 		text.Draw(item.image, item.text, mplusNormalFont, textX, 25, color.White)
 		screen.DrawImage(item.image, opts)
-		opts.GeoM.Translate(0, 36.0)
+		opts.GeoM.Translate(m.Offx, m.Offy)
 	}
 }
 
@@ -217,7 +222,7 @@ func main() {
 		{name: "optionButton", image: optionsImage, text: "OPTIONS"},
 		{name: "quitButton", image: quitImage, text: "QUIT"},
 	}
-	mainMenu = NewMenu(128, 128, &color.NRGBA{0x00, 0x80, 0x80, 0xff}, &color.NRGBA{0xff, 0xa5, 0x00, 0xff}, menuItems)
+	mainMenu = NewMenu(128, 128, 0, 30, &color.NRGBA{0x00, 0x80, 0x80, 0xff}, &color.NRGBA{0xff, 0xa5, 0x00, 0xff}, menuItems)
 
 	state = titleScreen
 
