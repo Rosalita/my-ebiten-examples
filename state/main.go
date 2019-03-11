@@ -31,11 +31,10 @@ type menuItem struct {
 
 // MenuList is a menu
 type MenuList struct {
-	Tx float64  // x translation of the menu
-	Ty float64  // y translation of the menu
-	Offx float64 // x offset of subsequent menu items
-	Offy float64 // y offset of subsequent menu items
-
+	Tx             float64      // x translation of the menu
+	Ty             float64      // y translation of the menu
+	Offx           float64      // x offset of subsequent menu items
+	Offy           float64      // y offset of subsequent menu items
 	BaseColour     *color.NRGBA // default unselected colour
 	SelectedColour *color.NRGBA // colour used when button is selected
 	SelectedIndex  *int         // index of the item in list which is selected
@@ -47,10 +46,10 @@ func NewMenu(tx float64, ty float64, offx float64, offy float64, basecolour *col
 	defaultSelectedIndex := 0
 
 	ml := MenuList{
-		Tx : tx,
-		Ty : ty,
-		Offx: offx,
-		Offy: offy,
+		Tx:             tx,
+		Ty:             ty,
+		Offx:           offx,
+		Offy:           offy,
 		BaseColour:     basecolour,
 		SelectedColour: selectedColour,
 		SelectedIndex:  &defaultSelectedIndex,
@@ -64,9 +63,14 @@ func (m *MenuList) GetBaseColour() *color.NRGBA {
 	return m.BaseColour
 }
 
-//GetSelectedColour returns hte menu selected colour
+//GetSelectedColour returns the menu selected colour
 func (m *MenuList) GetSelectedColour() *color.NRGBA {
 	return m.SelectedColour
+}
+
+//GetSelectedItem returns then name of the selected item
+func (m *MenuList) GetSelectedItem() string {
+	return m.MenuItems[*m.SelectedIndex].name
 }
 
 //IncrementSelected increments the selected index provided it is not already at maximum
@@ -156,12 +160,12 @@ func update(screen *ebiten.Image) error {
 		}
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			switch *mainMenu.SelectedIndex {
-			case 0:
+			switch mainMenu.GetSelectedItem() {
+			case "playButton":
 				state = play
-			case 1:
+			case "optionButton":
 				state = options
-			case 2:
+			case "quitButton":
 				os.Exit(0)
 			}
 			return nil
@@ -229,5 +233,4 @@ func main() {
 	if err := ebiten.Run(update, 400, 300, 2, "State!"); err != nil {
 		panic(err)
 	}
-
 }
