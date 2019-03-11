@@ -45,6 +45,11 @@ type MenuList struct {
 func NewMenu(tx float64, ty float64, offx float64, offy float64, basecolour *color.NRGBA, selectedColour *color.NRGBA, MenuItems []menuItem) MenuList {
 	defaultSelectedIndex := 0
 
+	for i := range MenuItems {
+		newImage, _ := ebiten.NewImage(128, 32, ebiten.FilterNearest)
+		MenuItems[i].image = newImage
+	}
+
 	ml := MenuList{
 		Tx:             tx,
 		Ty:             ty,
@@ -55,6 +60,7 @@ func NewMenu(tx float64, ty float64, offx float64, offy float64, basecolour *col
 		SelectedIndex:  &defaultSelectedIndex,
 		MenuItems:      MenuItems,
 	}
+
 	return ml
 }
 
@@ -217,15 +223,12 @@ func update(screen *ebiten.Image) error {
 
 func main() {
 
-	playImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
-	optionsImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
-	quitImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
-
 	menuItems := []menuItem{
-		{name: "playButton", image: playImage, text: "PLAY"},
-		{name: "optionButton", image: optionsImage, text: "OPTIONS"},
-		{name: "quitButton", image: quitImage, text: "QUIT"},
+		{name: "playButton", text: "PLAY"},
+		{name: "optionButton", text: "OPTIONS"},
+		{name: "quitButton", text: "QUIT"},
 	}
+
 	mainMenu = NewMenu(128, 128, 0, 30, &color.NRGBA{0x00, 0x80, 0x80, 0xff}, &color.NRGBA{0xff, 0xa5, 0x00, 0xff}, menuItems)
 
 	state = titleScreen
