@@ -23,78 +23,96 @@ const (
 	quit
 )
 
-type button struct {
-	name        string
-	buttonImage *ebiten.Image
-	buttonText  string
+type menuItem struct {
+	name  string
+	image *ebiten.Image
+	text  string
 }
 
-type ButtonList struct {
+// MenuList is a menu
+type MenuList struct {
 	BaseColour     *color.NRGBA // default unselected colour
 	SelectedColour *color.NRGBA // colour used when button is selected
 	SelectedIndex  *int         // item in list which is selected
-	Buttons        []button
+	MenuItems      []menuItem
 }
 
-func (b *ButtonList) GetBaseColour() *color.NRGBA {
-	return b.BaseColour
+//NewMenu creates a new menu
+func NewMenu(basecolour *color.NRGBA, selectedColour *color.NRGBA, MenuItems []menuItem) MenuList {
+	defaultSelectedIndex := 0
+
+	ml := MenuList{
+		BaseColour:     basecolour,
+		SelectedColour: selectedColour,
+		SelectedIndex:  &defaultSelectedIndex,
+		MenuItems:      MenuItems,
+	}
+	return ml
 }
 
-func (b *ButtonList) GetSelectedColour() *color.NRGBA {
-	return b.SelectedColour
+//GetBaseColour returns the menu base colour
+func (m *MenuList) GetBaseColour() *color.NRGBA {
+	return m.BaseColour
 }
 
-func (b *ButtonList) IncrementSelected() {
-	maxIndex := len(b.Buttons) - 1
-	if *b.SelectedIndex < maxIndex {
-		*b.SelectedIndex++
+//GetSelectedColour returns hte menu selected colour
+func (m *MenuList) GetSelectedColour() *color.NRGBA {
+	return m.SelectedColour
+}
+
+//IncrementSelected increments the selected index provided it is not already at maximum
+func (m *MenuList) IncrementSelected() {
+	maxIndex := len(m.MenuItems) - 1
+	if *m.SelectedIndex < maxIndex {
+		*m.SelectedIndex++
 	}
 }
 
-func (b *ButtonList) DecrementSelected() {
+//DecrementSelected decrements the selected index provided it is not already at minimum
+func (m *MenuList) DecrementSelected() {
 	minIndex := 0
-	if *b.SelectedIndex > minIndex {
-		*b.SelectedIndex--
+	if *m.SelectedIndex > minIndex {
+		*m.SelectedIndex--
 	}
 }
 
-func (b *ButtonList) Draw(screen *ebiten.Image) {
+//Draw draws the menu to the screen
+func (m *MenuList) Draw(screen *ebiten.Image) {
 
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(128.0, 128.0)
 
-	for index, button := range b.Buttons {
+	for index, item := range m.MenuItems {
 
-		if index == *b.SelectedIndex {
-			button.buttonImage.Fill(b.GetSelectedColour())
+		if index == *m.SelectedIndex {
+			item.image.Fill(m.GetSelectedColour())
 		} else {
-			button.buttonImage.Fill(b.GetBaseColour())
+			item.image.Fill(m.GetBaseColour())
 		}
 
 		textX := 0
-		if len(button.buttonText) == 4 {
+		if len(item.text) == 4 {
 			textX = 36
 		}
-		if len(button.buttonText) == 7 {
+		if len(item.text) == 7 {
 			textX = 12
 		}
 
-		text.Draw(button.buttonImage, button.buttonText, mplusNormalFont, textX, 25, color.White)
-		screen.DrawImage(button.buttonImage, opts)
+		text.Draw(item.image, item.text, mplusNormalFont, textX, 25, color.White)
+		screen.DrawImage(item.image, opts)
 		opts.GeoM.Translate(0, 36.0)
-
 	}
 }
 
 var (
-	state              gameState
-	playButtonImage    *ebiten.Image
-	optionsButtonImage *ebiten.Image
-	quitButtonImage    *ebiten.Image
-	square             *ebiten.Image
-	mplusNormalFont    font.Face
-	mplusBigFont       font.Face
-	selectedIndex      = 0
+	state           gameState
+	playImage       *ebiten.Image
+	optionsImage    *ebiten.Image
+	quitImage       *ebiten.Image
+	square          *ebiten.Image
+	mplusNormalFont font.Face
+	mplusBigFont    font.Face
+	mainMenu        MenuList
 )
 
 func init() {
@@ -119,52 +137,17 @@ func update(screen *ebiten.Image) error {
 	if state == titleScreen {
 
 		ebitenutil.DebugPrint(screen, "Title screen")
-		if playButtonImage == nil {
-			playButtonImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
-		}
-
-		if optionsButtonImage == nil {
-			optionsButtonImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
-		}
-
-		if quitButtonImage == nil {
-			quitButtonImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
-		}
-
-		buttonList := ButtonList{
-			BaseColour:     &color.NRGBA{0x00, 0x80, 0x80, 0xff},
-			SelectedColour: &color.NRGBA{0xff, 0xa5, 0x00, 0xff},
-			SelectedIndex:  &selectedIndex,
-			Buttons: []button{
-				button{
-					name:        "playButton",
-					buttonImage: playButtonImage,
-					buttonText:  "PLAY",
-				},
-				button{
-					name:        "optionButton",
-					buttonImage: optionsButtonImage,
-					buttonText:  "OPTIONS",
-				},
-				button{
-					name:        "quitButton",
-					buttonImage: quitButtonImage,
-					buttonText:  "QUIT",
-				},
-			},
-		}
-
-		buttonList.Draw(screen)
+		mainMenu.Draw(screen)
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-			buttonList.DecrementSelected()
+			mainMenu.DecrementSelected()
 		}
 		if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
-			buttonList.IncrementSelected()
+			mainMenu.IncrementSelected()
 		}
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
-			switch *buttonList.SelectedIndex {
+			switch *mainMenu.SelectedIndex {
 			case 0:
 				state = play
 			case 1:
@@ -220,6 +203,17 @@ func update(screen *ebiten.Image) error {
 }
 
 func main() {
+
+	playImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
+	optionsImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
+	quitImage, _ = ebiten.NewImage(128, 32, ebiten.FilterNearest)
+
+	menuItems := []menuItem{
+		{name: "playButton", image: playImage, text: "PLAY"},
+		{name: "optionButton", image: optionsImage, text: "OPTIONS"},
+		{name: "quitButton", image: quitImage, text: "QUIT"},
+	}
+	mainMenu = NewMenu(&color.NRGBA{0x00, 0x80, 0x80, 0xff}, &color.NRGBA{0xff, 0xa5, 0x00, 0xff}, menuItems)
 
 	state = titleScreen
 
