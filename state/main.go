@@ -31,31 +31,39 @@ type MenuItem struct {
 	Text  string
 }
 
+// TO DO
+// support default background colour
+// support menu items overriding background colour
+// Text features
+// support default text colour
+// Support menu items overriding text colour
+// Support default text alignment: left, right, centre
+
 // MenuList is a navigatable, selectable menu
 type MenuList struct {
-	Tx             float64      // x translation of the menu
-	Ty             float64      // y translation of the menu
-	Width          int          // width of all menu items
-	Height         int          // height of all menu items
-	Offx           float64      // x offset of subsequent menu items
-	Offy           float64      // y offset of subsequent menu items
-	BaseColour     *color.NRGBA // default unselected colour
-	SelectedColour *color.NRGBA // colour used when button is selected
-	SelectedIndex  *int         // index of the item in list which is selected
-	MenuItems      []MenuItem   // menu items
+	Tx               float64      // x translation of the menu
+	Ty               float64      // y translation of the menu
+	Width            int          // width of all menu items
+	Height           int          // height of all menu items
+	Offx             float64      // x offset of subsequent menu items
+	Offy             float64      // y offset of subsequent menu items
+	DefaultBgColour  *color.NRGBA // default background colour
+	DefaultSelColour *color.NRGBA // default selected colour
+	SelectedIndex    *int         // index of the item in list which is selected
+	MenuItems        []MenuItem   // menu items
 }
 
 // MenuListInput is an object used to create a menu list
 type MenuListInput struct {
-	Tx             float64      // optional, x translation of the menu, if not provided will be 0
-	Ty             float64      // optional, y translation of the menu, if not provided will be 0
-	Width          int          // mandatory, width of all menu items
-	Height         int          // mandatory, height of all menu items
-	Offx           float64      // optional, offset of subsequent menu items, if not provided will 0
-	Offy           float64      // optional, offset of subsequent menu items, if not provided will be menu item height
-	BaseColour     *color.NRGBA // optional, base colour of menu, if not provided will be cyan
-	SelectedColour *color.NRGBA // optional, selected colour of menu, if not provided will be magenta
-	MenuItems      []MenuItem   // mandtory, list of menu items
+	Tx               float64      // optional, x translation of the menu, if not provided will be 0
+	Ty               float64      // optional, y translation of the menu, if not provided will be 0
+	Width            int          // mandatory, width of all menu items
+	Height           int          // mandatory, height of all menu items
+	Offx             float64      // optional, offset of subsequent menu items, if not provided will 0
+	Offy             float64      // optional, offset of subsequent menu items, if not provided will be menu item height
+	DefaultBgColour  *color.NRGBA // optional, default background colour of menu, if not provided will be cyan
+	DefaultSelColour *color.NRGBA // optional, selected colour of menu, if not provided will be magenta
+	MenuItems        []MenuItem   // mandtory, list of menu items
 }
 
 //NewMenu constructs a new menu from a MenuListInput
@@ -75,27 +83,27 @@ func NewMenu(input MenuListInput) (MenuList, error) {
 		input.Offy = float64(input.Height)
 	}
 
-	if input.BaseColour == nil {
-		input.BaseColour = &color.NRGBA{0x00, 0xff, 0xff, 0xff}
+	if input.DefaultBgColour == nil {
+		input.DefaultBgColour = &color.NRGBA{0x00, 0xff, 0xff, 0xff}
 	}
 
-	if input.SelectedColour == nil {
-		input.SelectedColour = &color.NRGBA{0xff, 0x00, 0xff, 0xff}
+	if input.DefaultSelColour == nil {
+		input.DefaultSelColour = &color.NRGBA{0xff, 0x00, 0xff, 0xff}
 	}
 
 	defaultSelectedIndex := 0
 
 	ml := MenuList{
-		Tx:             input.Tx,
-		Ty:             input.Ty,
-		Width:          input.Width,
-		Height:         input.Height,
-		Offx:           input.Offx,
-		Offy:           input.Offy,
-		BaseColour:     input.BaseColour,
-		SelectedColour: input.SelectedColour,
-		SelectedIndex:  &defaultSelectedIndex,
-		MenuItems:      input.MenuItems,
+		Tx:               input.Tx,
+		Ty:               input.Ty,
+		Width:            input.Width,
+		Height:           input.Height,
+		Offx:             input.Offx,
+		Offy:             input.Offy,
+		DefaultBgColour:  input.DefaultBgColour,
+		DefaultSelColour: input.DefaultSelColour,
+		SelectedIndex:    &defaultSelectedIndex,
+		MenuItems:        input.MenuItems,
 	}
 
 	// initialise images for each menu item
@@ -107,14 +115,14 @@ func NewMenu(input MenuListInput) (MenuList, error) {
 	return ml, nil
 }
 
-//GetBaseColour returns the menu base colour
-func (m *MenuList) GetBaseColour() *color.NRGBA {
-	return m.BaseColour
+//GetDefaultBgColour returns the default background colour
+func (m *MenuList) GetDefaultBgColour() *color.NRGBA {
+	return m.DefaultBgColour
 }
 
-//GetSelectedColour returns the menu selected colour
-func (m *MenuList) GetSelectedColour() *color.NRGBA {
-	return m.SelectedColour
+//GetDefaultSelColour returns the default selected colour
+func (m *MenuList) GetDefaultSelColour() *color.NRGBA {
+	return m.DefaultSelColour
 }
 
 //GetSelectedItem returns then name of the selected item
@@ -147,9 +155,9 @@ func (m *MenuList) Draw(screen *ebiten.Image) {
 	for index, item := range m.MenuItems {
 
 		if index == *m.SelectedIndex {
-			item.image.Fill(m.GetSelectedColour())
+			item.image.Fill(m.GetDefaultSelColour())
 		} else {
-			item.image.Fill(m.GetBaseColour())
+			item.image.Fill(m.GetDefaultBgColour())
 		}
 
 		textX := 0
@@ -273,13 +281,13 @@ func main() {
 	}
 
 	newMenuInput := MenuListInput{
-		Width:          128,
-		Height:         36,
-		Tx:             128,
-		Ty:             128,
-		BaseColour:     &color.NRGBA{0x00, 0x80, 0x80, 0xff},
-		SelectedColour: &color.NRGBA{0xff, 0xa5, 0x00, 0xff},
-		MenuItems:      newMenuItems,
+		Width:            128,
+		Height:           36,
+		Tx:               128,
+		Ty:               128,
+		DefaultBgColour:  &color.NRGBA{0x00, 0x80, 0x80, 0xff},
+		DefaultSelColour: &color.NRGBA{0xff, 0xa5, 0x00, 0xff},
+		MenuItems:        newMenuItems,
 	}
 
 	newMenu, err := NewMenu(newMenuInput)
