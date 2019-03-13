@@ -2,7 +2,6 @@ package main
 
 import (
 	"errors"
-	"fmt"
 	"image/color"
 	"log"
 	"os"
@@ -34,10 +33,7 @@ type MenuItem struct {
 	SelColour *color.NRGBA // optional selected colour, overrides default selected colour
 }
 
-// TO DO
-// support default background colour
-// support menu items overriding background colour
-// Text features
+// TO DO - Text features
 // support default text colour
 // Support menu items overriding text colour
 // Support default text alignment: left, right, centre
@@ -129,9 +125,6 @@ func NewMenu(input MenuListInput) (MenuList, error) {
 		newImage, _ := ebiten.NewImage(ml.Width, ml.Height, ebiten.FilterNearest)
 		ml.MenuItems[i].image = newImage
 	}
-
-	fmt.Println("menu items created are:")
-	fmt.Println(ml.MenuItems)
 	return ml, nil
 }
 
