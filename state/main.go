@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"image/color"
 	"log"
 	"os"
@@ -23,47 +24,87 @@ const (
 	quit
 )
 
-type menuItem struct {
-	name  string
+// MenuItem represents an item in a menu list
+type MenuItem struct {
+	Name  string
 	image *ebiten.Image
-	text  string
+	Text  string
 }
 
-// MenuList is a menu
+// MenuList is a navigatable, selectable menu
 type MenuList struct {
 	Tx             float64      // x translation of the menu
 	Ty             float64      // y translation of the menu
-	width          int          // width of all menu items
-	height         int          // height of all menu items
+	Width          int          // width of all menu items
+	Height         int          // height of all menu items
 	Offx           float64      // x offset of subsequent menu items
 	Offy           float64      // y offset of subsequent menu items
 	BaseColour     *color.NRGBA // default unselected colour
 	SelectedColour *color.NRGBA // colour used when button is selected
 	SelectedIndex  *int         // index of the item in list which is selected
-	MenuItems      []menuItem   // menu items
+	MenuItems      []MenuItem   // menu items
 }
 
-//NewMenu creates a new menu
-func NewMenu(tx float64, ty float64, width int, height int, offx float64, offy float64, basecolour *color.NRGBA, selectedColour *color.NRGBA, MenuItems []menuItem) MenuList {
+// MenuListInput is an object used to create a menu list
+type MenuListInput struct {
+	Tx             float64      // optional, x translation of the menu, if not provided will be 0
+	Ty             float64      // optional, y translation of the menu, if not provided will be 0
+	Width          int          // mandatory, width of all menu items
+	Height         int          // mandatory, height of all menu items
+	Offx           float64      // optional, offset of subsequent menu items, if not provided will 0
+	Offy           float64      // optional, offset of subsequent menu items, if not provided will be menu item height
+	BaseColour     *color.NRGBA // optional, base colour of menu, if not provided will be cyan
+	SelectedColour *color.NRGBA // optional, selected colour of menu, if not provided will be magenta
+	MenuItems      []MenuItem   // mandtory, list of menu items
+}
+
+//NewMenu constructs a new menu from a MenuListInput
+func NewMenu(input MenuListInput) (MenuList, error) {
+
+	if input.Width == 0 {
+		return MenuList{}, errors.New("Mandatory input field width is missing")
+	}
+	if input.Height == 0 {
+		return MenuList{}, errors.New("Mandatory input field height is missing")
+	}
+	if len(input.MenuItems) < 1 {
+		return MenuList{}, errors.New("Mandatory input field MenuItems is missing")
+	}
+
+	if input.Offy == 0 {
+		input.Offy = float64(input.Height)
+	}
+
+	if input.BaseColour == nil {
+		input.BaseColour = &color.NRGBA{0x00, 0xff, 0xff, 0xff}
+	}
+
+	if input.SelectedColour == nil {
+		input.SelectedColour = &color.NRGBA{0xff, 0x00, 0xff, 0xff}
+	}
+
 	defaultSelectedIndex := 0
 
-	for i := range MenuItems {
-		newImage, _ := ebiten.NewImage(width, height, ebiten.FilterNearest)
-		MenuItems[i].image = newImage
-	}
-
 	ml := MenuList{
-		Tx:             tx,
-		Ty:             ty,
-		Offx:           offx,
-		Offy:           offy,
-		BaseColour:     basecolour,
-		SelectedColour: selectedColour,
+		Tx:             input.Tx,
+		Ty:             input.Ty,
+		Width:          input.Width,
+		Height:         input.Height,
+		Offx:           input.Offx,
+		Offy:           input.Offy,
+		BaseColour:     input.BaseColour,
+		SelectedColour: input.SelectedColour,
 		SelectedIndex:  &defaultSelectedIndex,
-		MenuItems:      MenuItems,
+		MenuItems:      input.MenuItems,
 	}
 
-	return ml
+	// initialise images for each menu item
+	for i := range ml.MenuItems {
+		newImage, _ := ebiten.NewImage(ml.Width, ml.Height, ebiten.FilterNearest)
+		ml.MenuItems[i].image = newImage
+	}
+
+	return ml, nil
 }
 
 //GetBaseColour returns the menu base colour
@@ -78,7 +119,7 @@ func (m *MenuList) GetSelectedColour() *color.NRGBA {
 
 //GetSelectedItem returns then name of the selected item
 func (m *MenuList) GetSelectedItem() string {
-	return m.MenuItems[*m.SelectedIndex].name
+	return m.MenuItems[*m.SelectedIndex].Name
 }
 
 //IncrementSelected increments the selected index provided it is not already at maximum
@@ -112,14 +153,14 @@ func (m *MenuList) Draw(screen *ebiten.Image) {
 		}
 
 		textX := 0
-		if len(item.text) == 4 {
+		if len(item.Text) == 4 {
 			textX = 36
 		}
-		if len(item.text) == 7 {
+		if len(item.Text) == 7 {
 			textX = 12
 		}
 
-		text.Draw(item.image, item.text, mplusNormalFont, textX, 25, color.White)
+		text.Draw(item.image, item.Text, mplusNormalFont, textX, 25, color.White)
 		screen.DrawImage(item.image, opts)
 		opts.GeoM.Translate(m.Offx, m.Offy)
 	}
@@ -225,12 +266,29 @@ func update(screen *ebiten.Image) error {
 
 func main() {
 
-	mainMenuItems := []menuItem{
-		{name: "playButton", text: "PLAY"},
-		{name: "optionButton", text: "OPTIONS"},
-		{name: "quitButton", text: "QUIT"},
+	newMenuItems := []MenuItem{
+		{Name: "playButton", Text: "PLAY"},
+		{Name: "optionButton", Text: "OPTIONS"},
+		{Name: "quitButton", Text: "QUIT"},
 	}
-	mainMenu = NewMenu(128, 128, 128, 36, 0, 30, &color.NRGBA{0x00, 0x80, 0x80, 0xff}, &color.NRGBA{0xff, 0xa5, 0x00, 0xff}, mainMenuItems)
+
+	newMenuInput := MenuListInput{
+		Width:          128,
+		Height:         36,
+		Tx:             128,
+		Ty:             128,
+		BaseColour:     &color.NRGBA{0x00, 0x80, 0x80, 0xff},
+		SelectedColour: &color.NRGBA{0xff, 0xa5, 0x00, 0xff},
+		MenuItems:      newMenuItems,
+	}
+
+	newMenu, err := NewMenu(newMenuInput)
+
+	if err != nil {
+		log.Printf("unable to create menu: %+v\n", err)
+	}
+
+	mainMenu = newMenu
 
 	state = titleScreen
 
