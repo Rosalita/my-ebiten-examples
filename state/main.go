@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"fmt"
 	"image/color"
 	"log"
 	"os"
@@ -26,9 +27,11 @@ const (
 
 // MenuItem represents an item in a menu list
 type MenuItem struct {
-	Name  string
-	image *ebiten.Image
-	Text  string
+	Name      string
+	image     *ebiten.Image
+	Text      string
+	BgColour  *color.NRGBA // optional background colour, overrides default colour
+	SelColour *color.NRGBA // optional selected colour, overrides default selected colour
 }
 
 // TO DO
@@ -106,23 +109,30 @@ func NewMenu(input MenuListInput) (MenuList, error) {
 		MenuItems:        input.MenuItems,
 	}
 
+	// set override colours if needed otherwise use default colours
+	for i, item := range input.MenuItems {
+		if item.BgColour != nil {
+			ml.MenuItems[i].BgColour = item.BgColour
+		} else {
+			ml.MenuItems[i].BgColour = ml.DefaultBgColour
+		}
+
+		if item.SelColour != nil {
+			ml.MenuItems[i].SelColour = item.SelColour
+		} else {
+			ml.MenuItems[i].SelColour = ml.DefaultSelColour
+		}
+	}
+
 	// initialise images for each menu item
 	for i := range ml.MenuItems {
 		newImage, _ := ebiten.NewImage(ml.Width, ml.Height, ebiten.FilterNearest)
 		ml.MenuItems[i].image = newImage
 	}
 
+	fmt.Println("menu items created are:")
+	fmt.Println(ml.MenuItems)
 	return ml, nil
-}
-
-//GetDefaultBgColour returns the default background colour
-func (m *MenuList) GetDefaultBgColour() *color.NRGBA {
-	return m.DefaultBgColour
-}
-
-//GetDefaultSelColour returns the default selected colour
-func (m *MenuList) GetDefaultSelColour() *color.NRGBA {
-	return m.DefaultSelColour
 }
 
 //GetSelectedItem returns then name of the selected item
@@ -155,9 +165,9 @@ func (m *MenuList) Draw(screen *ebiten.Image) {
 	for index, item := range m.MenuItems {
 
 		if index == *m.SelectedIndex {
-			item.image.Fill(m.GetDefaultSelColour())
+			item.image.Fill(item.SelColour)
 		} else {
-			item.image.Fill(m.GetDefaultBgColour())
+			item.image.Fill(item.BgColour)
 		}
 
 		textX := 0
@@ -275,9 +285,18 @@ func update(screen *ebiten.Image) error {
 func main() {
 
 	newMenuItems := []MenuItem{
-		{Name: "playButton", Text: "PLAY"},
-		{Name: "optionButton", Text: "OPTIONS"},
-		{Name: "quitButton", Text: "QUIT"},
+		{Name: "playButton",
+			Text:      "PLAY",
+			BgColour:  &color.NRGBA{0xd7, 0x0f, 0xff, 0xff},
+			SelColour: &color.NRGBA{0xee, 0x99, 0xff, 0xff}},
+		{Name: "optionButton",
+			Text:      "OPTIONS",
+			BgColour:  &color.NRGBA{0xf5, 0x00, 0xb1, 0xff},
+			SelColour: &color.NRGBA{0xff, 0x9e, 0xe4, 0xff}},
+		{Name: "quitButton",
+			Text:      "QUIT",
+			BgColour:  &color.NRGBA{0xff, 0x1a, 0x6d, 0xff},
+			SelColour: &color.NRGBA{0xff, 0x94, 0xbb, 0xff}},
 	}
 
 	newMenuInput := MenuListInput{
