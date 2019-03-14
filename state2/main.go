@@ -1,13 +1,13 @@
 package main
 
 import (
+	"github.com/Rosalita/my-ebiten/my-packages/menu"
+	"github.com/hajimehoshi/ebiten"
+	"github.com/hajimehoshi/ebiten/ebitenutil" // required for debug text
+	"github.com/hajimehoshi/ebiten/inpututil"  // required for isKeyJustPressed
 	"image/color"
 	"log"
 	"os"
-	"github.com/hajimehoshi/ebiten"
-	"github.com/hajimehoshi/ebiten/ebitenutil" // required for debug text
-	"github.com/hajimehoshi/ebiten/inpututil" // required for isKeyJustPressed
-	"github.com/Rosalita/my-ebiten/my-packages/menu"
 )
 
 type gameState int
@@ -34,12 +34,12 @@ var (
 )
 
 var (
-	state           gameState
-	playImage       *ebiten.Image
-	optionsImage    *ebiten.Image
-	quitImage       *ebiten.Image
-	square          *ebiten.Image
-	mainMenu        menu.MenuList
+	state        gameState
+	playImage    *ebiten.Image
+	optionsImage *ebiten.Image
+	quitImage    *ebiten.Image
+	square       *ebiten.Image
+	mainMenu     menu.MenuList
 )
 
 func update(screen *ebiten.Image) error {
@@ -116,21 +116,21 @@ func update(screen *ebiten.Image) error {
 
 func main() {
 
-	newMenuItems := []menu.MenuItem{
+	newMenuItems := []menu.Item{
 		{Name: "playButton",
 			Text:     "PLAY",
-			TxtX: 36,
-			TxtY: 25,
+			TxtX:     36,
+			TxtY:     25,
 			BgColour: green1},
 		{Name: "optionButton",
 			Text:     "OPTIONS",
-			TxtX: 12,
-			TxtY: 25,
+			TxtX:     12,
+			TxtY:     25,
 			BgColour: green2},
 		{Name: "quitButton",
 			Text:     "QUIT",
-			TxtX: 36,
-			TxtY: 25,
+			TxtX:     36,
+			TxtY:     25,
 			BgColour: green3},
 	}
 
@@ -140,7 +140,7 @@ func main() {
 		Tx:                 128,
 		Ty:                 128,
 		DefaultSelBGColour: purple3,
-		MenuItems:          newMenuItems,
+		Items:              newMenuItems,
 	}
 
 	newMenu, err := menu.NewMenu(newMenuInput)
