@@ -56,8 +56,8 @@ type MenuList struct {
 	Items               []Item       // menu items
 }
 
-// MenuListInput is an object used to create a menu list
-type MenuListInput struct {
+// Input is an object used to create a menu list
+type Input struct {
 	Tx                  float64      // optional, x translation of the menu, if not provided will be 0
 	Ty                  float64      // optional, y translation of the menu, if not provided will be 0
 	Width               int          // mandatory, width of all menu items
@@ -71,8 +71,8 @@ type MenuListInput struct {
 	Items               []Item       // mandtory, list of menu items
 }
 
-//NewMenu constructs a new menu from a MenuListInput
-func NewMenu(input MenuListInput) (MenuList, error) {
+//NewMenu constructs a new menu from a Input
+func NewMenu(input Input) (MenuList, error) {
 
 	if input.Width == 0 {
 		return MenuList{}, errors.New("Mandatory input field width is missing")

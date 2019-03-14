@@ -6,7 +6,6 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil" // required for debug text
 	"github.com/hajimehoshi/ebiten/inpututil"  // required for isKeyJustPressed
 	"image/color"
-	"log"
 	"os"
 )
 
@@ -116,7 +115,7 @@ func update(screen *ebiten.Image) error {
 
 func main() {
 
-	newMenuItems := []menu.Item{
+	menuItems := []menu.Item{
 		{Name: "playButton",
 			Text:     "PLAY",
 			TxtX:     36,
@@ -134,20 +133,16 @@ func main() {
 			BgColour: green3},
 	}
 
-	newMenuInput := menu.MenuListInput{
+	menuInput := menu.Input{
 		Width:              128,
 		Height:             36,
 		Tx:                 128,
 		Ty:                 128,
 		DefaultSelBGColour: purple3,
-		Items:              newMenuItems,
+		Items:              menuItems,
 	}
 
-	newMenu, err := menu.NewMenu(newMenuInput)
-
-	if err != nil {
-		log.Printf("unable to create menu: %+v\n", err)
-	}
+	newMenu, _ := menu.NewMenu(menuInput)
 
 	mainMenu = newMenu
 
