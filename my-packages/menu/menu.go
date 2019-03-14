@@ -1,4 +1,4 @@
-package menulist
+package menu
 
 import(
 	"log"
