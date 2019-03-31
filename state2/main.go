@@ -1,12 +1,17 @@
 package main
 
 import (
-	"github.com/Rosalita/my-ebiten/my-packages/menu"
+	"image/color"
+	"image"
+	"bytes"
+	"os"
+	"log"
+
+	"github.com/Rosalita/my-ebiten/pkgs/menu"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil" // required for debug text
 	"github.com/hajimehoshi/ebiten/inpututil"  // required for isKeyJustPressed
-	"image/color"
-	"os"
+	"github.com/Rosalita/my-ebiten/resources/my_img"
 )
 
 type gameState int
@@ -14,12 +19,16 @@ type gameState int
 const (
 	titleScreen gameState = iota
 	options
-	play
+	charSel
 	quit
 )
 
-// define some kind of palette?
+// define some kind of palette
 var (
+	white   = &color.NRGBA{0xff, 0xff, 0xff, 0xff}
+	pink    = &color.NRGBA{0xff, 0x69, 0xb4, 0xff}
+	orange1 = &color.NRGBA{0xfe, 0x7f, 0x2d, 0xff}
+	blue1   = &color.NRGBA{0x6f, 0xe9, 0xee, 0xff}
 	green1  = &color.NRGBA{0x00, 0x38, 0x40, 0xff}
 	green2  = &color.NRGBA{0x00, 0x5a, 0x5b, 0xff}
 	green3  = &color.NRGBA{0x00, 0x73, 0x69, 0xff}
@@ -33,13 +42,23 @@ var (
 )
 
 var (
-	state        gameState
-	playImage    *ebiten.Image
-	optionsImage *ebiten.Image
-	quitImage    *ebiten.Image
-	square       *ebiten.Image
-	mainMenu     menu.MenuList
+	state gameState
+	myImage  *ebiten.Image
+	mainMenu    menu.MenuList
+	optionsMenu menu.MenuList
 )
+
+func init(){
+
+// use https://github.com/hajimehoshi/file2byteslice
+// to embed an image
+
+	img, _, err := image.Decode(bytes.NewReader(my_img.BirdSkull))
+	if err != nil {
+		log.Fatal(err)
+	}
+	myImage, _ = ebiten.NewImageFromImage(img, ebiten.FilterDefault)
+}
 
 func update(screen *ebiten.Image) error {
 
@@ -49,6 +68,13 @@ func update(screen *ebiten.Image) error {
 
 		ebitenutil.DebugPrint(screen, "Title screen")
 		mainMenu.Draw(screen)
+
+		opts := &ebiten.DrawImageOptions{}
+		opts.GeoM.Translate(200, 24)
+    
+		// Draw the title image
+		screen.DrawImage(myImage, opts)
+
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
 			mainMenu.DecrementSelected()
@@ -60,7 +86,7 @@ func update(screen *ebiten.Image) error {
 		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 			switch mainMenu.GetSelectedItem() {
 			case "playButton":
-				state = play
+				state = charSel
 			case "optionButton":
 				state = options
 			case "quitButton":
@@ -71,18 +97,10 @@ func update(screen *ebiten.Image) error {
 
 	}
 
-	if state == play {
-		ebitenutil.DebugPrint(screen, "Play screen")
+	if state == charSel {
+		ebitenutil.DebugPrint(screen, "Character Select")
 
-		if square == nil {
-			square, _ = ebiten.NewImage(32, 32, ebiten.FilterNearest)
-		}
-		someColor := &color.NRGBA{0x7f, 0xff, 0x00, 0xff}
-		square.Fill(someColor)
 
-		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(64.0, 64.0)
-		screen.DrawImage(square, opts)
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 			state = titleScreen
@@ -93,16 +111,14 @@ func update(screen *ebiten.Image) error {
 
 	if state == options {
 		ebitenutil.DebugPrint(screen, "Options screen")
+		optionsMenu.Draw(screen)
 
-		if square == nil {
-			square, _ = ebiten.NewImage(32, 32, ebiten.FilterNearest)
+		if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+			optionsMenu.DecrementSelected()
 		}
-		someColor := &color.NRGBA{0x8a, 0x2b, 0xe2, 0xff}
-		square.Fill(someColor)
-
-		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(64.0, 64.0)
-		screen.DrawImage(square, opts)
+		if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+			optionsMenu.IncrementSelected()
+		}
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 			state = titleScreen
@@ -115,40 +131,83 @@ func update(screen *ebiten.Image) error {
 
 func main() {
 
-	menuItems := []menu.Item{
-		{Name: "playButton",
-			Text:     "PLAY",
-			TxtX:     36,
-			TxtY:     25,
-			BgColour: green1},
-		{Name: "optionButton",
-			Text:     "OPTIONS",
-			TxtX:     12,
-			TxtY:     25,
-			BgColour: green2},
-		{Name: "quitButton",
-			Text:     "QUIT",
-			TxtX:     36,
-			TxtY:     25,
-			BgColour: green3},
-	}
+	initMenus()
 
-	menuInput := menu.Input{
-		Width:              128,
-		Height:             36,
-		Tx:                 128,
-		Ty:                 128,
-		DefaultSelBGColour: purple3,
-		Items:              menuItems,
-	}
+	// if titleImage == nil {
+    //     // Create the title image
+	// 	titleImage, _ = ebiten.NewImage(128, 128, ebiten.FilterNearest)
+	// 	titleImage.Fill(color.White)
+    // } 
 
-	newMenu, _ := menu.NewMenu(menuInput)
 
-	mainMenu = newMenu
-
+	
 	state = titleScreen
 
 	if err := ebiten.Run(update, 400, 300, 2, "State!"); err != nil {
 		panic(err)
 	}
+}
+
+func initMenus() {
+
+	mainMenuItems := []menu.Item{
+		{Name: "playButton",
+			Text:     "PLAY",
+			TxtX:     40,
+			TxtY:     25,
+			BgColour: white},
+		{Name: "optionButton",
+			Text:     "OPTIONS",
+			TxtX:     16,
+			TxtY:     25,
+			BgColour: white},
+		{Name: "quitButton",
+			Text:     "QUIT",
+			TxtX:     40,
+			TxtY:     25,
+			BgColour: white},
+	}
+
+	mainMenuInput := menu.Input{
+		Width:              140,
+		Height:             36,
+		Tx:                 24,
+		Ty:                 24,
+		Offy:               40,
+		DefaultSelBGColour: pink,
+		Items:              mainMenuItems,
+	}
+
+	mainMenu, _ = menu.NewMenu(mainMenuInput)
+
+	optionsMenuItems := []menu.Item{
+		{Name: "screen",
+			Text:     "SCREEN",
+			TxtX:     28,
+			TxtY:     25,
+			BgColour: white},
+		{Name: "sound",
+			Text:     "SOUND",
+			TxtX:     32,
+			TxtY:     25,
+			BgColour: white},
+		{Name: "language",
+			Text:     "LANGUAGE",
+			TxtX:     4,
+			TxtY:     25,
+			BgColour: white},
+	}
+
+	optionsMenuInput := menu.Input{
+		Width:              140,
+		Height:             36,
+		Tx:                 24,
+		Ty:                 24,
+		Offy:               40,
+		DefaultSelBGColour: pink,
+		Items:              optionsMenuItems,
+	}
+
+	optionsMenu, _ = menu.NewMenu(optionsMenuInput)
+
 }
