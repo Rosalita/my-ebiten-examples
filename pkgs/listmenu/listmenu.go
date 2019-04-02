@@ -1,4 +1,4 @@
-package menu
+package listmenu
 
 import (
 	"errors"
@@ -27,7 +27,7 @@ func init() {
 	})
 }
 
-// Item represents an item in a menu list
+// Item represents an item in a list menu
 type Item struct {
 	Name         string
 	Text         string
@@ -40,8 +40,8 @@ type Item struct {
 	SelTxtColour *color.NRGBA  // optional selected text colour, overrides default selected text colour
 }
 
-// MenuList is a navigatable, selectable menu
-type MenuList struct {
+// ListMenu is a navigatable, selectable menu
+type ListMenu struct {
 	Tx                  float64      // x translation of the menu
 	Ty                  float64      // y translation of the menu
 	Width               int          // width of all menu items
@@ -71,17 +71,17 @@ type Input struct {
 	Items               []Item       // mandtory, list of menu items
 }
 
-//NewMenu constructs a new menu from a Input
-func NewMenu(input Input) (MenuList, error) {
+//NewMenu constructs a new list menu from a Input
+func NewMenu(input Input) (ListMenu, error) {
 
 	if input.Width == 0 {
-		return MenuList{}, errors.New("Mandatory input field width is missing")
+		return ListMenu{}, errors.New("Mandatory input field width is missing")
 	}
 	if input.Height == 0 {
-		return MenuList{}, errors.New("Mandatory input field height is missing")
+		return ListMenu{}, errors.New("Mandatory input field height is missing")
 	}
 	if len(input.Items) < 1 {
-		return MenuList{}, errors.New("Mandatory input field MenuItems is missing")
+		return ListMenu{}, errors.New("Mandatory input field MenuItems is missing")
 	}
 
 	if input.Offy == 0 {
@@ -106,7 +106,7 @@ func NewMenu(input Input) (MenuList, error) {
 
 	defaultSelectedIndex := 0
 
-	ml := MenuList{
+	ml := ListMenu{
 		Tx:                  input.Tx,
 		Ty:                  input.Ty,
 		Width:               input.Width,
@@ -162,12 +162,12 @@ func NewMenu(input Input) (MenuList, error) {
 }
 
 //GetSelectedItem returns then name of the selected item
-func (m *MenuList) GetSelectedItem() string {
+func (m *ListMenu) GetSelectedItem() string {
 	return m.Items[*m.SelectedIndex].Name
 }
 
 //IncrementSelected increments the selected index provided it is not already at maximum
-func (m *MenuList) IncrementSelected() {
+func (m *ListMenu) IncrementSelected() {
 	maxIndex := len(m.Items) - 1
 	if *m.SelectedIndex < maxIndex {
 		*m.SelectedIndex++
@@ -175,15 +175,15 @@ func (m *MenuList) IncrementSelected() {
 }
 
 //DecrementSelected decrements the selected index provided it is not already at minimum
-func (m *MenuList) DecrementSelected() {
+func (m *ListMenu) DecrementSelected() {
 	minIndex := 0
 	if *m.SelectedIndex > minIndex {
 		*m.SelectedIndex--
 	}
 }
 
-//Draw draws the menu to the screen
-func (m *MenuList) Draw(screen *ebiten.Image) {
+//Draw draws the list menu to the screen
+func (m *ListMenu) Draw(screen *ebiten.Image) {
 
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(m.Tx, m.Ty)

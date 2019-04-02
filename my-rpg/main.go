@@ -7,7 +7,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/Rosalita/my-ebiten/pkgs/menu"
+	menu "github.com/Rosalita/my-ebiten/pkgs/listmenu"
 	"github.com/Rosalita/my-ebiten/resources/avatars"
 	"github.com/Rosalita/my-ebiten/resources/my_img"
 	"github.com/hajimehoshi/ebiten"
@@ -47,9 +47,9 @@ var (
 	mainImage   *ebiten.Image
 	charImage   *ebiten.Image
 	rightArrow  *ebiten.Image
-	leftArrow *ebiten.Image
-	mainMenu    menu.MenuList
-	optionsMenu menu.MenuList
+	leftArrow   *ebiten.Image
+	mainMenu    menu.ListMenu
+	optionsMenu menu.ListMenu
 )
 
 func init() {
@@ -116,10 +116,10 @@ func update(screen *ebiten.Image) error {
 		picy := 24.0
 
 		rv1 := ebiten.Vertex{
-			DstX: 0 + float32(picx*2),
-			DstY: 0 + float32(picy*2),
-			SrcX: 0,
-			SrcY: 0,
+			DstX:   0 + float32(picx*2),
+			DstY:   0 + float32(picy*2),
+			SrcX:   0,
+			SrcY:   0,
 			ColorR: 1,
 			ColorG: 1,
 			ColorB: 1,
@@ -127,10 +127,10 @@ func update(screen *ebiten.Image) error {
 		}
 
 		rv2 := ebiten.Vertex{
-			DstX: 10 + float32(picx*2),
-			DstY: 10 + float32(picy*2),
-			SrcX: 0,
-			SrcY: 0,
+			DstX:   10 + float32(picx*2),
+			DstY:   10 + float32(picy*2),
+			SrcX:   0,
+			SrcY:   0,
 			ColorR: 1,
 			ColorG: 1,
 			ColorB: 1,
@@ -138,22 +138,21 @@ func update(screen *ebiten.Image) error {
 		}
 
 		rv3 := ebiten.Vertex{
-			DstX: 0 + float32(picx*2),
-			DstY: 20 + float32(picy*2),
-			SrcX: 0,
-			SrcY: 0,
+			DstX:   0 + float32(picx*2),
+			DstY:   20 + float32(picy*2),
+			SrcX:   0,
+			SrcY:   0,
 			ColorR: 1,
 			ColorG: 1,
 			ColorB: 1,
 			ColorA: 1,
 		}
 
-
 		lv1 := ebiten.Vertex{
-			DstX: 10 + float32(picx),
-			DstY: 0 + float32(picy*2),
-			SrcX: 0,
-			SrcY: 0,
+			DstX:   10 + float32(picx),
+			DstY:   0 + float32(picy*2),
+			SrcX:   0,
+			SrcY:   0,
 			ColorR: 1,
 			ColorG: 1,
 			ColorB: 1,
@@ -161,10 +160,10 @@ func update(screen *ebiten.Image) error {
 		}
 
 		lv2 := ebiten.Vertex{
-			DstX: 10 + float32(picx),
-			DstY: 20 + float32(picy*2),
-			SrcX: 0,
-			SrcY: 0,
+			DstX:   10 + float32(picx),
+			DstY:   20 + float32(picy*2),
+			SrcX:   0,
+			SrcY:   0,
 			ColorR: 1,
 			ColorG: 1,
 			ColorB: 1,
@@ -172,25 +171,23 @@ func update(screen *ebiten.Image) error {
 		}
 
 		lv3 := ebiten.Vertex{
-			DstX: 0 + float32(picx),
-			DstY: 10 + float32(picy*2),
-			SrcX: 0,
-			SrcY: 0,
+			DstX:   0 + float32(picx),
+			DstY:   10 + float32(picy*2),
+			SrcX:   0,
+			SrcY:   0,
 			ColorR: 1,
 			ColorG: 1,
 			ColorB: 1,
 			ColorA: 1,
 		}
 
-
-
-		rightvs := []ebiten.Vertex{rv1,rv2,rv3}
+		rightvs := []ebiten.Vertex{rv1, rv2, rv3}
 		leftvs := []ebiten.Vertex{lv1, lv2, lv3}
 
-		indices := []uint16{0,1,2}
+		indices := []uint16{0, 1, 2}
 
 		op := &ebiten.DrawTrianglesOptions{}
-	
+
 		rightArrow.Fill(color.White)
 		leftArrow.Fill(color.White)
 
@@ -209,7 +206,7 @@ func update(screen *ebiten.Image) error {
 		// screen.DrawImage(charImage, opts)
 
 		opts := &ebiten.DrawImageOptions{}
-		
+
 		opts.GeoM.Translate(picx, picy)
 		screen.DrawImage(charImage, opts)
 
