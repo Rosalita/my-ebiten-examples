@@ -2,13 +2,14 @@ package listmenu
 
 import (
 	"errors"
+	"image/color"
+	"log"
+
 	"github.com/golang/freetype/truetype"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/examples/resources/fonts"
 	"github.com/hajimehoshi/ebiten/text"
 	"golang.org/x/image/font"
-	"image/color"
-	"log"
 )
 
 var mplusNormalFont font.Face
@@ -106,7 +107,7 @@ func NewMenu(input Input) (ListMenu, error) {
 
 	defaultSelectedIndex := 0
 
-	ml := ListMenu{
+	m := ListMenu{
 		Tx:                  input.Tx,
 		Ty:                  input.Ty,
 		Width:               input.Width,
@@ -124,41 +125,41 @@ func NewMenu(input Input) (ListMenu, error) {
 	// set override colours if needed otherwise use default colours
 	for i, item := range input.Items {
 		if item.BgColour != nil {
-			ml.Items[i].BgColour = item.BgColour
+			m.Items[i].BgColour = item.BgColour
 		} else {
-			ml.Items[i].BgColour = ml.DefaultBgColour
+			m.Items[i].BgColour = m.DefaultBgColour
 		}
 
 		if item.TxtColour != nil {
-			ml.Items[i].TxtColour = item.TxtColour
+			m.Items[i].TxtColour = item.TxtColour
 		} else {
-			ml.Items[i].TxtColour = ml.DefaultTxtColour
+			m.Items[i].TxtColour = m.DefaultTxtColour
 		}
 
 		if item.SelBgColour != nil {
-			ml.Items[i].SelBgColour = item.SelBgColour
+			m.Items[i].SelBgColour = item.SelBgColour
 		} else {
-			ml.Items[i].SelBgColour = ml.DefaultSelBgColour
+			m.Items[i].SelBgColour = m.DefaultSelBgColour
 		}
 
 		if item.SelTxtColour != nil {
-			ml.Items[i].SelTxtColour = item.SelTxtColour
+			m.Items[i].SelTxtColour = item.SelTxtColour
 		} else {
-			ml.Items[i].SelTxtColour = ml.DefaultSelTxtColour
+			m.Items[i].SelTxtColour = m.DefaultSelTxtColour
 		}
 
 		if item.TxtY == 0 {
-			ml.Items[i].TxtY = ml.Height - 5 // default value for text y height
+			m.Items[i].TxtY = m.Height - 5 // default value for text y height
 		}
 
 	}
 
 	// initialise images for each menu item
-	for i := range ml.Items {
-		newImage, _ := ebiten.NewImage(ml.Width, ml.Height, ebiten.FilterNearest)
-		ml.Items[i].image = newImage
+	for i := range m.Items {
+		newImage, _ := ebiten.NewImage(m.Width, m.Height, ebiten.FilterNearest)
+		m.Items[i].image = newImage
 	}
-	return ml, nil
+	return m, nil
 }
 
 //GetSelectedItem returns then name of the selected item

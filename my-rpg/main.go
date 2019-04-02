@@ -7,7 +7,8 @@ import (
 	"log"
 	"os"
 
-	menu "github.com/Rosalita/my-ebiten/pkgs/listmenu"
+	im "github.com/Rosalita/my-ebiten/pkgs/imagemenu"
+	lm "github.com/Rosalita/my-ebiten/pkgs/listmenu"
 	"github.com/Rosalita/my-ebiten/resources/avatars"
 	"github.com/Rosalita/my-ebiten/resources/my_img"
 	"github.com/hajimehoshi/ebiten"
@@ -48,14 +49,12 @@ var (
 	charImage   *ebiten.Image
 	rightArrow  *ebiten.Image
 	leftArrow   *ebiten.Image
-	mainMenu    menu.ListMenu
-	optionsMenu menu.ListMenu
+	mainMenu    lm.ListMenu
+	optionsMenu lm.ListMenu
+	charMenu    im.ImageMenu
 )
 
 func init() {
-
-	// use https://github.com/hajimehoshi/file2byteslice
-	// to embed an image
 
 	img, _, err := image.Decode(bytes.NewReader(my_img.BirdSkull))
 	if err != nil {
@@ -112,103 +111,15 @@ func update(screen *ebiten.Image) error {
 	if state == charSel {
 		ebitenutil.DebugPrint(screen, "Character Select")
 
-		picx := 100.0
-		picy := 24.0
+		charMenu.Draw(screen)
 
-		rv1 := ebiten.Vertex{
-			DstX:   0 + float32(picx*2),
-			DstY:   0 + float32(picy*2),
-			SrcX:   0,
-			SrcY:   0,
-			ColorR: 1,
-			ColorG: 1,
-			ColorB: 1,
-			ColorA: 1,
+		if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+			charMenu.IncrementSelected()
 		}
 
-		rv2 := ebiten.Vertex{
-			DstX:   10 + float32(picx*2),
-			DstY:   10 + float32(picy*2),
-			SrcX:   0,
-			SrcY:   0,
-			ColorR: 1,
-			ColorG: 1,
-			ColorB: 1,
-			ColorA: 1,
+		if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
+			charMenu.DecrementSelected()
 		}
-
-		rv3 := ebiten.Vertex{
-			DstX:   0 + float32(picx*2),
-			DstY:   20 + float32(picy*2),
-			SrcX:   0,
-			SrcY:   0,
-			ColorR: 1,
-			ColorG: 1,
-			ColorB: 1,
-			ColorA: 1,
-		}
-
-		lv1 := ebiten.Vertex{
-			DstX:   10 + float32(picx),
-			DstY:   0 + float32(picy*2),
-			SrcX:   0,
-			SrcY:   0,
-			ColorR: 1,
-			ColorG: 1,
-			ColorB: 1,
-			ColorA: 1,
-		}
-
-		lv2 := ebiten.Vertex{
-			DstX:   10 + float32(picx),
-			DstY:   20 + float32(picy*2),
-			SrcX:   0,
-			SrcY:   0,
-			ColorR: 1,
-			ColorG: 1,
-			ColorB: 1,
-			ColorA: 1,
-		}
-
-		lv3 := ebiten.Vertex{
-			DstX:   0 + float32(picx),
-			DstY:   10 + float32(picy*2),
-			SrcX:   0,
-			SrcY:   0,
-			ColorR: 1,
-			ColorG: 1,
-			ColorB: 1,
-			ColorA: 1,
-		}
-
-		rightvs := []ebiten.Vertex{rv1, rv2, rv3}
-		leftvs := []ebiten.Vertex{lv1, lv2, lv3}
-
-		indices := []uint16{0, 1, 2}
-
-		op := &ebiten.DrawTrianglesOptions{}
-
-		rightArrow.Fill(color.White)
-		leftArrow.Fill(color.White)
-
-		screen.DrawTriangles(rightvs, indices, rightArrow, op)
-		screen.DrawTriangles(leftvs, indices, leftArrow, op)
-
-		// if charImage == nil {
-		// 	charImage, _ = ebiten.NewImage(100, 100, ebiten.FilterNearest)
-		// }
-
-		// charImage.Fill(color.White)
-
-		// opts := &ebiten.DrawImageOptions{}
-		// opts.GeoM.Translate(150, 24)
-
-		// screen.DrawImage(charImage, opts)
-
-		opts := &ebiten.DrawImageOptions{}
-
-		opts.GeoM.Translate(picx, picy)
-		screen.DrawImage(charImage, opts)
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
 			state = titleScreen
@@ -250,7 +161,7 @@ func main() {
 
 func initMenus() {
 
-	mainMenuItems := []menu.Item{
+	mainMenuItems := []lm.Item{
 		{Name: "playButton",
 			Text:     "PLAY",
 			TxtX:     40,
@@ -268,7 +179,7 @@ func initMenus() {
 			BgColour: white},
 	}
 
-	mainMenuInput := menu.Input{
+	mainMenuInput := lm.Input{
 		Width:              140,
 		Height:             36,
 		Tx:                 24,
@@ -278,9 +189,9 @@ func initMenus() {
 		Items:              mainMenuItems,
 	}
 
-	mainMenu, _ = menu.NewMenu(mainMenuInput)
+	mainMenu, _ = lm.NewMenu(mainMenuInput)
 
-	optionsMenuItems := []menu.Item{
+	optionsMenuItems := []lm.Item{
 		{Name: "screen",
 			Text:     "SCREEN",
 			TxtX:     28,
@@ -298,7 +209,7 @@ func initMenus() {
 			BgColour: white},
 	}
 
-	optionsMenuInput := menu.Input{
+	optionsMenuInput := lm.Input{
 		Width:              140,
 		Height:             36,
 		Tx:                 24,
@@ -308,6 +219,59 @@ func initMenus() {
 		Items:              optionsMenuItems,
 	}
 
-	optionsMenu, _ = menu.NewMenu(optionsMenuInput)
+	optionsMenu, _ = lm.NewMenu(optionsMenuInput)
+
+	charMenuItems := []im.Item{
+		{
+			Name:  "f1",
+			Bytes: avatars.F_01_s,
+		},
+		{
+			Name:  "f2",
+			Bytes: avatars.F_02_s,
+		},
+		{
+			Name:  "f3",
+			Bytes: avatars.F_03_s,
+		},
+		{
+			Name:  "f4",
+			Bytes: avatars.F_04_s,
+		},
+		{
+			Name:  "f5",
+			Bytes: avatars.F_05_s,
+		},
+		{
+			Name:  "m1",
+			Bytes: avatars.M_01_s,
+		},
+		{
+			Name:  "m2",
+			Bytes: avatars.M_02_s,
+		},
+		{
+			Name:  "m3",
+			Bytes: avatars.M_03_s,
+		},
+		{
+			Name:  "m4",
+			Bytes: avatars.M_04_s,
+		},
+		{
+			Name:  "m5",
+			Bytes: avatars.M_05_s,
+		},
+	}
+
+	charMenuInput := im.Input{
+		Tx:        100,
+		Ty:        100,
+		ImgWidth:  100,
+		ImgHeight: 100,
+		Items:     charMenuItems,
+	}
+
+	charMenu, _ = im.NewMenu(charMenuInput)
 
 }
