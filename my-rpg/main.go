@@ -46,6 +46,8 @@ var (
 	state       gameState
 	mainImage   *ebiten.Image
 	charImage   *ebiten.Image
+	rightArrow  *ebiten.Image
+	leftArrow *ebiten.Image
 	mainMenu    menu.MenuList
 	optionsMenu menu.MenuList
 )
@@ -67,6 +69,9 @@ func init() {
 	}
 
 	charImage, _ = ebiten.NewImageFromImage(img2, ebiten.FilterDefault)
+
+	rightArrow, _ = ebiten.NewImage(36, 36, ebiten.FilterDefault)
+	leftArrow, _ = ebiten.NewImage(36, 36, ebiten.FilterDefault)
 
 }
 
@@ -107,6 +112,91 @@ func update(screen *ebiten.Image) error {
 	if state == charSel {
 		ebitenutil.DebugPrint(screen, "Character Select")
 
+		picx := 100.0
+		picy := 24.0
+
+		rv1 := ebiten.Vertex{
+			DstX: 0 + float32(picx*2),
+			DstY: 0 + float32(picy*2),
+			SrcX: 0,
+			SrcY: 0,
+			ColorR: 1,
+			ColorG: 1,
+			ColorB: 1,
+			ColorA: 1,
+		}
+
+		rv2 := ebiten.Vertex{
+			DstX: 10 + float32(picx*2),
+			DstY: 10 + float32(picy*2),
+			SrcX: 0,
+			SrcY: 0,
+			ColorR: 1,
+			ColorG: 1,
+			ColorB: 1,
+			ColorA: 1,
+		}
+
+		rv3 := ebiten.Vertex{
+			DstX: 0 + float32(picx*2),
+			DstY: 20 + float32(picy*2),
+			SrcX: 0,
+			SrcY: 0,
+			ColorR: 1,
+			ColorG: 1,
+			ColorB: 1,
+			ColorA: 1,
+		}
+
+
+		lv1 := ebiten.Vertex{
+			DstX: 10 + float32(picx),
+			DstY: 0 + float32(picy*2),
+			SrcX: 0,
+			SrcY: 0,
+			ColorR: 1,
+			ColorG: 1,
+			ColorB: 1,
+			ColorA: 1,
+		}
+
+		lv2 := ebiten.Vertex{
+			DstX: 10 + float32(picx),
+			DstY: 20 + float32(picy*2),
+			SrcX: 0,
+			SrcY: 0,
+			ColorR: 1,
+			ColorG: 1,
+			ColorB: 1,
+			ColorA: 1,
+		}
+
+		lv3 := ebiten.Vertex{
+			DstX: 0 + float32(picx),
+			DstY: 10 + float32(picy*2),
+			SrcX: 0,
+			SrcY: 0,
+			ColorR: 1,
+			ColorG: 1,
+			ColorB: 1,
+			ColorA: 1,
+		}
+
+
+
+		rightvs := []ebiten.Vertex{rv1,rv2,rv3}
+		leftvs := []ebiten.Vertex{lv1, lv2, lv3}
+
+		indices := []uint16{0,1,2}
+
+		op := &ebiten.DrawTrianglesOptions{}
+	
+		rightArrow.Fill(color.White)
+		leftArrow.Fill(color.White)
+
+		screen.DrawTriangles(rightvs, indices, rightArrow, op)
+		screen.DrawTriangles(leftvs, indices, leftArrow, op)
+
 		// if charImage == nil {
 		// 	charImage, _ = ebiten.NewImage(100, 100, ebiten.FilterNearest)
 		// }
@@ -119,7 +209,8 @@ func update(screen *ebiten.Image) error {
 		// screen.DrawImage(charImage, opts)
 
 		opts := &ebiten.DrawImageOptions{}
-		opts.GeoM.Translate(150, 24)
+		
+		opts.GeoM.Translate(picx, picy)
 		screen.DrawImage(charImage, opts)
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
