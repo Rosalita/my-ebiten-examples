@@ -9,7 +9,6 @@ import (
 
 	im "github.com/Rosalita/my-ebiten/pkgs/imagemenu"
 	lm "github.com/Rosalita/my-ebiten/pkgs/listmenu"
-	"github.com/Rosalita/my-ebiten/resources/avatars"
 	"github.com/Rosalita/my-ebiten/resources/my_img"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil" // required for debug text
@@ -21,7 +20,7 @@ type gameState int
 const (
 	titleScreen gameState = iota
 	options
-	charSel
+	charCreation
 	quit
 )
 
@@ -51,7 +50,9 @@ var (
 	leftArrow   *ebiten.Image
 	mainMenu    lm.ListMenu
 	optionsMenu lm.ListMenu
-	charMenu    im.ImageMenu
+	charGroupMenu    im.ImageMenu
+	humanMenu    im.ImageMenu
+	creatureMenu im.ImageMenu
 )
 
 func init() {
@@ -61,13 +62,6 @@ func init() {
 		log.Fatal(err)
 	}
 	mainImage, _ = ebiten.NewImageFromImage(img, ebiten.FilterDefault)
-
-	img2, _, err := image.Decode(bytes.NewReader(avatars.F_02_s))
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	charImage, _ = ebiten.NewImageFromImage(img2, ebiten.FilterDefault)
 
 	rightArrow, _ = ebiten.NewImage(36, 36, ebiten.FilterDefault)
 	leftArrow, _ = ebiten.NewImage(36, 36, ebiten.FilterDefault)
@@ -97,7 +91,7 @@ func update(screen *ebiten.Image) error {
 		if inpututil.IsKeyJustPressed(ebiten.KeyEnter) {
 			switch mainMenu.GetSelectedItem() {
 			case "playButton":
-				state = charSel
+				state = charCreation
 			case "optionButton":
 				state = options
 			case "quitButton":
@@ -108,17 +102,25 @@ func update(screen *ebiten.Image) error {
 
 	}
 
-	if state == charSel {
-		ebitenutil.DebugPrint(screen, "Character Select")
+	if state == charCreation {
+		ebitenutil.DebugPrint(screen, "Character Creation")
 
-		charMenu.Draw(screen)
+		charGroupMenu.Draw(screen)
+
+		humanMenu.Draw(screen)
+
+		creatureMenu.Draw(screen)
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-			charMenu.IncrementSelected()
+			charGroupMenu.IncrementSelected()
+			humanMenu.IncrementSelected()
+			creatureMenu.IncrementSelected()
 		}
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
-			charMenu.DecrementSelected()
+			charGroupMenu.DecrementSelected()
+			humanMenu.DecrementSelected()
+			creatureMenu.DecrementSelected()
 		}
 
 		if inpututil.IsKeyJustPressed(ebiten.KeyEscape) {
@@ -157,121 +159,4 @@ func main() {
 	if err := ebiten.Run(update, 400, 300, 2, "State!"); err != nil {
 		panic(err)
 	}
-}
-
-func initMenus() {
-
-	mainMenuItems := []lm.Item{
-		{Name: "playButton",
-			Text:     "PLAY",
-			TxtX:     40,
-			TxtY:     25,
-			BgColour: white},
-		{Name: "optionButton",
-			Text:     "OPTIONS",
-			TxtX:     16,
-			TxtY:     25,
-			BgColour: white},
-		{Name: "quitButton",
-			Text:     "QUIT",
-			TxtX:     40,
-			TxtY:     25,
-			BgColour: white},
-	}
-
-	mainMenuInput := lm.Input{
-		Width:              140,
-		Height:             36,
-		Tx:                 24,
-		Ty:                 24,
-		Offy:               40,
-		DefaultSelBGColour: pink,
-		Items:              mainMenuItems,
-	}
-
-	mainMenu, _ = lm.NewMenu(mainMenuInput)
-
-	optionsMenuItems := []lm.Item{
-		{Name: "screen",
-			Text:     "SCREEN",
-			TxtX:     28,
-			TxtY:     25,
-			BgColour: white},
-		{Name: "sound",
-			Text:     "SOUND",
-			TxtX:     32,
-			TxtY:     25,
-			BgColour: white},
-		{Name: "language",
-			Text:     "LANGUAGE",
-			TxtX:     4,
-			TxtY:     25,
-			BgColour: white},
-	}
-
-	optionsMenuInput := lm.Input{
-		Width:              140,
-		Height:             36,
-		Tx:                 24,
-		Ty:                 24,
-		Offy:               40,
-		DefaultSelBGColour: pink,
-		Items:              optionsMenuItems,
-	}
-
-	optionsMenu, _ = lm.NewMenu(optionsMenuInput)
-
-	charMenuItems := []im.Item{
-		{
-			Name:  "f1",
-			Bytes: avatars.F_01_s,
-		},
-		{
-			Name:  "f2",
-			Bytes: avatars.F_02_s,
-		},
-		{
-			Name:  "f3",
-			Bytes: avatars.F_03_s,
-		},
-		{
-			Name:  "f4",
-			Bytes: avatars.F_04_s,
-		},
-		{
-			Name:  "f5",
-			Bytes: avatars.F_05_s,
-		},
-		{
-			Name:  "m1",
-			Bytes: avatars.M_01_s,
-		},
-		{
-			Name:  "m2",
-			Bytes: avatars.M_02_s,
-		},
-		{
-			Name:  "m3",
-			Bytes: avatars.M_03_s,
-		},
-		{
-			Name:  "m4",
-			Bytes: avatars.M_04_s,
-		},
-		{
-			Name:  "m5",
-			Bytes: avatars.M_05_s,
-		},
-	}
-
-	charMenuInput := im.Input{
-		Tx:        100,
-		Ty:        100,
-		ImgWidth:  100,
-		ImgHeight: 100,
-		Items:     charMenuItems,
-	}
-
-	charMenu, _ = im.NewMenu(charMenuInput)
-
 }
