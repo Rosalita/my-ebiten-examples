@@ -177,6 +177,12 @@ func (m *AlphaMenu) DecX() {
 //IncY increments the selected Y index provided it is not already at maximum
 func (m *AlphaMenu) IncY() {
 	maxIndex :=  len(m.CharList)/ m.CharsPerRow 
+
+	//TO DO 
+	//charsOnFinalRow := len(m.CharList)% m.CharsPerRow 
+	// are we on the second last row?
+	// if so check can go down and go down if possible
+
 	if *m.SelectedY < maxIndex {
 		*m.SelectedY++
 	}
