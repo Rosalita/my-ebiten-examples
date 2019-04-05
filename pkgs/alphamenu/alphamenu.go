@@ -1,7 +1,6 @@
 package alphamenu
 
 import (
-	"fmt"
 	"image/color"
 	"log"
 
@@ -32,8 +31,6 @@ func init() {
 type CharBox struct {
 	Name   string        // a name to describe each menu item
 	Char   string        // The character displayed on the box
-	LocX   float64       // X location of the charbox
-	LocY   float64       // Y location of the charbox
 	TxtX   int           // X location to draw text
 	TxtY   int           // Y location to draw text
 	Xindex int           // the X index of the charbox
@@ -51,6 +48,8 @@ type AlphaMenu struct {
 	DefaultTxtColour    *color.NRGBA // default text colour
 	DefaultSelBgColour  *color.NRGBA // default selected background colour
 	DefaultSelTxtColour *color.NRGBA // default selected text colour
+	CharList            string       // a string containing all the characters to display
+	CharsPerRow         int          // the number of chars in a row
 	SelectedX           *int         // x index of the selected item
 	SelectedY           *int         // y index of the selected item
 	CharBoxes           []CharBox
@@ -87,51 +86,27 @@ func NewMenu(input Input) (AlphaMenu, error) {
 
 	defaultSelectedX := 0
 	defaultSelectedY := 0
-	defaultOffx := 24.0
-	defaultOffy := 24.0
+	defaultOffx := 20.0
+	defaultOffy := 20.0
+	defaultCharBoxWidth := 18
+	defaultCharBoxHeight := 18
+	defaultCharsPerRow := 13
 
-
-	// draw 13 x 2 boxes for each lower case letter
-
-
-
-	validChars := "abcdef"
+	charList := "abcdefghijklmnopqrstuvwxyz."
 
 	allBoxes := []CharBox{}
 
+	for i, char := range charList {
 
-	for i, char := range validChars {
-
-		if i == 0 {
-			img, _ := ebiten.NewImage(20, 20, ebiten.FilterNearest)
-
-			charBox := CharBox{
-				Name:   string(char),
-				Char:   string(char),
-				LocX:   input.Tx,
-				LocY:   input.Ty,
-				TxtX:   6,
-				TxtY:   14,
-				Xindex: i,
-				Yindex: 0,
-				image:  img,
-			}
-
-			allBoxes = append(allBoxes, charBox)
-			continue
-		}
-
-		img, _ := ebiten.NewImage(20, 20, ebiten.FilterNearest)
+		img, _ := ebiten.NewImage(defaultCharBoxWidth, defaultCharBoxHeight, ebiten.FilterNearest)
 
 		charBox := CharBox{
 			Name:   string(char),
 			Char:   string(char),
-			LocX:   allBoxes[i-1].LocX + float64(defaultOffx),
-			LocY:   allBoxes[i-1].LocY,
 			TxtX:   6,
 			TxtY:   14,
-			Xindex: i,
-			Yindex: 0,
+			Xindex: i % defaultCharsPerRow,
+			Yindex: i / defaultCharsPerRow,
 			image:  img,
 		}
 
@@ -148,12 +123,12 @@ func NewMenu(input Input) (AlphaMenu, error) {
 		DefaultTxtColour:    input.DefaultTxtColour,
 		DefaultSelBgColour:  input.DefaultSelBGColour,
 		DefaultSelTxtColour: input.DefaultSelTxtColour,
+		CharList:            charList,
+		CharsPerRow:         defaultCharsPerRow,
 		SelectedX:           &defaultSelectedX,
 		SelectedY:           &defaultSelectedY,
 		CharBoxes:           allBoxes,
 	}
-
-	fmt.Println(m)
 
 	return m, nil
 }
@@ -164,13 +139,53 @@ func (m *AlphaMenu) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(m.Tx, m.Ty)
 
-	for _, cb := range m.CharBoxes {
+	for i, cb := range m.CharBoxes {
 
-		cb.image.Fill(m.DefaultBgColour)
+		if i != 0 && i%m.CharsPerRow == 0 { // if not first item and start of a new row
+			opts.GeoM.Translate(-(float64(m.CharsPerRow) * m.Offx), m.Offy)
+		}
+
+		if *m.SelectedX == cb.Xindex && *m.SelectedY == cb.Yindex {
+			cb.image.Fill(m.DefaultSelBgColour)
+		} else {
+			cb.image.Fill(m.DefaultBgColour)
+		}
 
 		text.Draw(cb.image, cb.Char, mplusNormalFont, int(cb.TxtX), int(cb.TxtY), m.DefaultTxtColour)
 
 		screen.DrawImage(cb.image, opts)
 		opts.GeoM.Translate(m.Offx, 0.0)
+	}
+}
+
+//IncX increments the selected X index provided it is not already at maximum
+func (m *AlphaMenu) IncX() {
+	maxIndex := m.CharsPerRow - 1
+	if *m.SelectedX < maxIndex {
+		*m.SelectedX++
+	}
+}
+
+//DecX decrements the selected X index provided it is not already at minimum
+func (m *AlphaMenu) DecX() {
+	minIndex := 0
+	if *m.SelectedX > minIndex {
+		*m.SelectedX--
+	}
+}
+
+//IncY increments the selected Y index provided it is not already at maximum
+func (m *AlphaMenu) IncY() {
+	maxIndex :=  len(m.CharList)/ m.CharsPerRow 
+	if *m.SelectedY < maxIndex {
+		*m.SelectedY++
+	}
+}
+
+//DecY decrements the selected X index provided it is not already at minimum
+func (m *AlphaMenu) DecY() {
+	minIndex := 0
+	if *m.SelectedY > minIndex {
+		*m.SelectedY--
 	}
 }

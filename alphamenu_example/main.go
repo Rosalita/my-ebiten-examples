@@ -5,6 +5,8 @@ import (
 
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil" // This is required to draw debug texts.
+	"github.com/hajimehoshi/ebiten/inpututil"  // required for isKeyJustPressed
+
 	am "github.com/Rosalita/my-ebiten/pkgs/alphamenu"
 
 )
@@ -19,6 +21,19 @@ func update(screen *ebiten.Image) error {
 	ebitenutil.DebugPrint(screen, "Alphabet menu")
 
 	alphaMenu.Draw(screen)
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
+		alphaMenu.DecY()
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
+		alphaMenu.IncY()
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
+		alphaMenu.IncX()
+	}
+	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
+		alphaMenu.DecX()
+	}
 
 	return nil
 }
