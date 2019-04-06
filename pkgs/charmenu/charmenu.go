@@ -87,9 +87,9 @@ func NewMenu(input Input) (CharMenu, error) {
 	defaultOffy := 20.0
 	defaultWidth := 18
 	defaultHeight := 18
-	defaultLineLength := 12
+	defaultLineLength := 13
 
-	charList := "abcdefghijklmnopqrstuvwxyz."
+	charList := "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ. "
 
 	charGrid := charListToCharGrid(charList, defaultLineLength)
 
@@ -221,8 +221,21 @@ func initGrid(grid [][]CharItem, width, height int) [][]CharItem {
 		for x := range row {
 			img, _ := ebiten.NewImage(width, height, ebiten.FilterNearest)
 			grid[y][x].image = img
-			grid[y][x].TxtX = 6
-			grid[y][x].TxtY = 14
+
+			if grid[y][x].Char == "w" || grid[y][x].Char == "M" {
+				grid[y][x].TxtX = 3
+				grid[y][x].TxtY = 14
+			} else if  grid[y][x].Char == "W"{
+				grid[y][x].TxtX = 2
+				grid[y][x].TxtY = 14
+			}else if  grid[y][x].Char == "N" || grid[y][x].Char == "Q" || grid[y][x].Char == "O" ||  grid[y][x].Char == "m"{
+					grid[y][x].TxtX = 4
+					grid[y][x].TxtY = 14
+			} else {
+				grid[y][x].TxtX = 5
+				grid[y][x].TxtY = 14
+			}
+
 		}
 	}
 	return grid
