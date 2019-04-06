@@ -87,7 +87,7 @@ func NewMenu(input Input) (AlphaMenu, error) {
 	defaultOffy := 20.0
 	defaultWidth := 18
 	defaultHeight := 18
-	defaultLineLength := 13
+	defaultLineLength := 12
 
 	charList := "abcdefghijklmnopqrstuvwxyz."
 
@@ -144,16 +144,23 @@ func (m *AlphaMenu) Draw(screen *ebiten.Image) {
 	}
 }
 
-//IncRow increments the selectedRow index provided it is not already at maximum
+//IncRow increments the selectedRow index if able
 func (m *AlphaMenu) IncRow() {
-	maxIndex := len(m.CharList) / m.CharsPerRow
+	lastRowIndex := len(m.CharList) / m.CharsPerRow
 
-	if *m.SelectedRow < maxIndex {
+	if *m.SelectedRow < lastRowIndex-1 {
 		*m.SelectedRow++
+	} else if *m.SelectedRow == lastRowIndex-1 {
+		numCharsOnLastRow := len(m.CharList) % m.CharsPerRow
+		if *m.SelectedCol <= (numCharsOnLastRow - 1) {
+			*m.SelectedRow++
+		}
+
 	}
+
 }
 
-//DecRow decrements the selectedRow index provided it is not already at minimum
+//DecRow decrements the selectedRow index if able
 func (m *AlphaMenu) DecRow() {
 	minIndex := 0
 	if *m.SelectedRow > minIndex {
@@ -161,20 +168,25 @@ func (m *AlphaMenu) DecRow() {
 	}
 }
 
-//IncCol increments the selectedCol index provided it is not already at maximum
+//IncCol increments the selectedCol index if able
 func (m *AlphaMenu) IncCol() {
 	maxIndex := m.CharsPerRow - 1
+	lastRowIndex := len(m.CharList) / m.CharsPerRow
 
-	//TO DO
-	// are we on the second last row?
-	// if so check can go down and go down if possible
-
-	if *m.SelectedCol < maxIndex {
+	if *m.SelectedCol < maxIndex && *m.SelectedRow < lastRowIndex {
 		*m.SelectedCol++
+	} else if *m.SelectedRow == lastRowIndex {
+
+		numCharsOnLastRow := len(m.CharList) % m.CharsPerRow
+
+		if *m.SelectedCol < numCharsOnLastRow-1 {
+			*m.SelectedCol++
+		}
+
 	}
 }
 
-//DecCol decrements the selectedCol index provided it is not already at minimum
+//DecCol decrements the selectedCol index if able
 func (m *AlphaMenu) DecCol() {
 	minIndex := 0
 	if *m.SelectedCol > minIndex {
