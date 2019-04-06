@@ -7,51 +7,59 @@ import (
 	"github.com/hajimehoshi/ebiten/ebitenutil" // This is required to draw debug texts.
 	"github.com/hajimehoshi/ebiten/inpututil"  // required for isKeyJustPressed
 
-	am "github.com/Rosalita/my-ebiten/pkgs/alphamenu"
+	cm "github.com/Rosalita/my-ebiten/pkgs/charmenu"
 
 )
 
 var (
-	alphaMenu am.AlphaMenu
+	charMenu cm.CharMenu
+	displayString string
 )
 
 func update(screen *ebiten.Image) error {
 
 	screen.Fill(color.NRGBA{0x00, 0x00, 0x00, 0xff})
-	ebitenutil.DebugPrint(screen, "Alphabet menu")
 
-	alphaMenu.Draw(screen)
+	
+	ebitenutil.DebugPrint(screen, displayString)
+
+	charMenu.Draw(screen)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-		alphaMenu.DecRow()
+		charMenu.DecRow()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
-		alphaMenu.IncRow()
+		charMenu.IncRow()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-		alphaMenu.IncCol()
+		charMenu.IncCol()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
-		alphaMenu.DecCol()
+		charMenu.DecCol()
+	}
+
+	if inpututil.IsKeyJustPressed(ebiten.KeyEnter){
+		displayString += charMenu.GetSelectedChar()
 	}
 
 	return nil
 }
 
 func main() {
+	displayString = ""
 
 	white := &color.NRGBA{0xff, 0xff, 0xff, 0xff}
 
-	alphaMenuInput := am.Input{
+	charMenuInput := cm.Input{
 		Tx: 50,
 		Ty: 50,
 		DefaultBgColour: white,
 	}
 
-	alphaMenu, _ = am.NewMenu(alphaMenuInput)
+	charMenu, _ = cm.NewMenu(charMenuInput)
 
 
-	if err := ebiten.Run(update, 320, 240, 2, "Alphabet menu"); err != nil {
+	if err := ebiten.Run(update, 320, 240, 2, "Character menu"); err != nil {
 		panic(err)
 	}
 }

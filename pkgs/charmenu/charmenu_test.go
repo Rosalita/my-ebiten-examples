@@ -1,4 +1,4 @@
-package alphamenu
+package charmenu
 
 import (
 	"testing"

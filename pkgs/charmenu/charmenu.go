@@ -1,4 +1,4 @@
-package alphamenu
+package charmenu
 
 import (
 	"image/color"
@@ -27,16 +27,16 @@ func init() {
 	})
 }
 
-// CharBox is a selectable box that holds a single character
-type CharBox struct {
+// CharItem holds everything needed to display a single character
+type CharItem struct {
 	Char  string        // The character displayed on the box
 	TxtX  int           // X location to draw text
 	TxtY  int           // Y location to draw text
 	image *ebiten.Image // used to store the image for the char box
 }
 
-// AlphaMenu is a navigatable, selectable menu
-type AlphaMenu struct {
+// CharMenu is a navigatable, selectable menu that displays chars
+type CharMenu struct {
 	Tx                  float64      // x translation of the menu
 	Ty                  float64      // y translation of the menu
 	Offx                float64      // X offset for each character box
@@ -49,7 +49,7 @@ type AlphaMenu struct {
 	CharsPerRow         int          // the number of chars in a row
 	SelectedRow         *int         // row index of the selected item
 	SelectedCol         *int         // column index of the selected item
-	CharGrid            [][]CharBox
+	CharGrid            [][]CharItem
 }
 
 // Input is an object used to create an alpha list
@@ -63,7 +63,7 @@ type Input struct {
 }
 
 //NewMenu constructs a new alpha menu from a Input
-func NewMenu(input Input) (AlphaMenu, error) {
+func NewMenu(input Input) (CharMenu, error) {
 
 	if input.DefaultBgColour == nil {
 		input.DefaultBgColour = &color.NRGBA{0x00, 0xff, 0xff, 0xff}
@@ -95,7 +95,7 @@ func NewMenu(input Input) (AlphaMenu, error) {
 
 	charGrid = initGrid(charGrid, defaultWidth, defaultHeight)
 
-	m := AlphaMenu{
+	m := CharMenu{
 		Tx:                  input.Tx,
 		Ty:                  input.Ty,
 		Offx:                defaultOffx,
@@ -115,7 +115,7 @@ func NewMenu(input Input) (AlphaMenu, error) {
 }
 
 //Draw draws the list menu to the screen
-func (m *AlphaMenu) Draw(screen *ebiten.Image) {
+func (m *CharMenu) Draw(screen *ebiten.Image) {
 
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(m.Tx, m.Ty)
@@ -144,8 +144,13 @@ func (m *AlphaMenu) Draw(screen *ebiten.Image) {
 	}
 }
 
+//GetSelectedChar returns the char selected in the menu
+func (m *CharMenu) GetSelectedChar() string {
+	return m.CharGrid[*m.SelectedRow][*m.SelectedCol].Char
+}
+
 //IncRow increments the selectedRow index if able
-func (m *AlphaMenu) IncRow() {
+func (m *CharMenu) IncRow() {
 	lastRowIndex := len(m.CharList) / m.CharsPerRow
 
 	if *m.SelectedRow < lastRowIndex-1 {
@@ -155,13 +160,11 @@ func (m *AlphaMenu) IncRow() {
 		if *m.SelectedCol <= (numCharsOnLastRow - 1) {
 			*m.SelectedRow++
 		}
-
 	}
-
 }
 
 //DecRow decrements the selectedRow index if able
-func (m *AlphaMenu) DecRow() {
+func (m *CharMenu) DecRow() {
 	minIndex := 0
 	if *m.SelectedRow > minIndex {
 		*m.SelectedRow--
@@ -169,7 +172,7 @@ func (m *AlphaMenu) DecRow() {
 }
 
 //IncCol increments the selectedCol index if able
-func (m *AlphaMenu) IncCol() {
+func (m *CharMenu) IncCol() {
 	maxIndex := m.CharsPerRow - 1
 	lastRowIndex := len(m.CharList) / m.CharsPerRow
 
@@ -187,33 +190,33 @@ func (m *AlphaMenu) IncCol() {
 }
 
 //DecCol decrements the selectedCol index if able
-func (m *AlphaMenu) DecCol() {
+func (m *CharMenu) DecCol() {
 	minIndex := 0
 	if *m.SelectedCol > minIndex {
 		*m.SelectedCol--
 	}
 }
 
-func charListToCharGrid(charList string, lineLength int) (foo [][]CharBox) {
-	charGrid := [][]CharBox{}
+func charListToCharGrid(charList string, lineLength int) (foo [][]CharItem) {
+	charGrid := [][]CharItem{}
 	lines := splitIntoLines(charList, lineLength)
 	for _, line := range lines {
 
-		row := []CharBox{}
+		row := []CharItem{}
 
 		for _, char := range line {
 
-			charBox := CharBox{
+			charItem := CharItem{
 				Char: string(char),
 			}
-			row = append(row, charBox)
+			row = append(row, charItem)
 		}
 		charGrid = append(charGrid, row)
 	}
 	return charGrid
 }
 
-func initGrid(grid [][]CharBox, width, height int) [][]CharBox {
+func initGrid(grid [][]CharItem, width, height int) [][]CharItem {
 	for y, row := range grid {
 		for x := range row {
 			img, _ := ebiten.NewImage(width, height, ebiten.FilterNearest)
