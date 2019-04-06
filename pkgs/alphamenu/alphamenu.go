@@ -29,13 +29,10 @@ func init() {
 
 // CharBox is a selectable box that holds a single character
 type CharBox struct {
-	Name   string        // a name to describe each menu item
-	Char   string        // The character displayed on the box
-	TxtX   int           // X location to draw text
-	TxtY   int           // Y location to draw text
-	Xindex int           // the X index of the charbox
-	Yindex int           // the Y index of the charbox
-	image  *ebiten.Image // used to store the image for the char box
+	Char  string        // The character displayed on the box
+	TxtX  int           // X location to draw text
+	TxtY  int           // Y location to draw text
+	image *ebiten.Image // used to store the image for the char box
 }
 
 // AlphaMenu is a navigatable, selectable menu
@@ -50,9 +47,9 @@ type AlphaMenu struct {
 	DefaultSelTxtColour *color.NRGBA // default selected text colour
 	CharList            string       // a string containing all the characters to display
 	CharsPerRow         int          // the number of chars in a row
-	SelectedX           *int         // x index of the selected item
-	SelectedY           *int         // y index of the selected item
-	CharBoxes           []CharBox
+	SelectedRow         *int         // row index of the selected item
+	SelectedCol         *int         // column index of the selected item
+	CharGrid            [][]CharBox
 }
 
 // Input is an object used to create an alpha list
@@ -84,35 +81,19 @@ func NewMenu(input Input) (AlphaMenu, error) {
 		input.DefaultSelTxtColour = &color.NRGBA{0xff, 0xff, 0xff, 0xff}
 	}
 
-	defaultSelectedX := 0
-	defaultSelectedY := 0
+	defaultSelectedRow := 0
+	defaultSelectedCol := 0
 	defaultOffx := 20.0
 	defaultOffy := 20.0
-	defaultCharBoxWidth := 18
-	defaultCharBoxHeight := 18
-	defaultCharsPerRow := 13
+	defaultWidth := 18
+	defaultHeight := 18
+	defaultLineLength := 13
 
 	charList := "abcdefghijklmnopqrstuvwxyz."
 
-	allBoxes := []CharBox{}
+	charGrid := charListToCharGrid(charList, defaultLineLength)
 
-	for i, char := range charList {
-
-		img, _ := ebiten.NewImage(defaultCharBoxWidth, defaultCharBoxHeight, ebiten.FilterNearest)
-
-		charBox := CharBox{
-			Name:   string(char),
-			Char:   string(char),
-			TxtX:   6,
-			TxtY:   14,
-			Xindex: i % defaultCharsPerRow,
-			Yindex: i / defaultCharsPerRow,
-			image:  img,
-		}
-
-		allBoxes = append(allBoxes, charBox)
-
-	}
+	charGrid = initGrid(charGrid, defaultWidth, defaultHeight)
 
 	m := AlphaMenu{
 		Tx:                  input.Tx,
@@ -124,10 +105,10 @@ func NewMenu(input Input) (AlphaMenu, error) {
 		DefaultSelBgColour:  input.DefaultSelBGColour,
 		DefaultSelTxtColour: input.DefaultSelTxtColour,
 		CharList:            charList,
-		CharsPerRow:         defaultCharsPerRow,
-		SelectedX:           &defaultSelectedX,
-		SelectedY:           &defaultSelectedY,
-		CharBoxes:           allBoxes,
+		CharsPerRow:         defaultLineLength,
+		SelectedRow:         &defaultSelectedRow,
+		SelectedCol:         &defaultSelectedCol,
+		CharGrid:            charGrid,
 	}
 
 	return m, nil
@@ -139,59 +120,112 @@ func (m *AlphaMenu) Draw(screen *ebiten.Image) {
 	opts := &ebiten.DrawImageOptions{}
 	opts.GeoM.Translate(m.Tx, m.Ty)
 
-	for i, cb := range m.CharBoxes {
+	for y, row := range m.CharGrid {
+		for x := range row {
 
-		if i != 0 && i%m.CharsPerRow == 0 { // if not first item and start of a new row
-			opts.GeoM.Translate(-(float64(m.CharsPerRow) * m.Offx), m.Offy)
+			if y != 0 && x == 0 { // if  not first row and is first item in the row
+				// translate back to start of row
+				// translate down to start drawing new row
+				opts.GeoM.Translate(-(float64(m.CharsPerRow) * m.Offx), m.Offy)
+			}
+
+			if *m.SelectedRow == y && *m.SelectedCol == x {
+				m.CharGrid[y][x].image.Fill(m.DefaultSelBgColour)
+			} else {
+				m.CharGrid[y][x].image.Fill(m.DefaultBgColour)
+			}
+
+			text.Draw(m.CharGrid[y][x].image, m.CharGrid[y][x].Char, mplusNormalFont, int(m.CharGrid[y][x].TxtX), int(m.CharGrid[y][x].TxtY), m.DefaultTxtColour)
+
+			screen.DrawImage(m.CharGrid[y][x].image, opts)
+			opts.GeoM.Translate(m.Offx, 0.0)
+
 		}
-
-		if *m.SelectedX == cb.Xindex && *m.SelectedY == cb.Yindex {
-			cb.image.Fill(m.DefaultSelBgColour)
-		} else {
-			cb.image.Fill(m.DefaultBgColour)
-		}
-
-		text.Draw(cb.image, cb.Char, mplusNormalFont, int(cb.TxtX), int(cb.TxtY), m.DefaultTxtColour)
-
-		screen.DrawImage(cb.image, opts)
-		opts.GeoM.Translate(m.Offx, 0.0)
 	}
 }
 
-//IncX increments the selected X index provided it is not already at maximum
-func (m *AlphaMenu) IncX() {
-	maxIndex := m.CharsPerRow - 1
-	if *m.SelectedX < maxIndex {
-		*m.SelectedX++
+//IncRow increments the selectedRow index provided it is not already at maximum
+func (m *AlphaMenu) IncRow() {
+	maxIndex := len(m.CharList) / m.CharsPerRow
+
+	if *m.SelectedRow < maxIndex {
+		*m.SelectedRow++
 	}
 }
 
-//DecX decrements the selected X index provided it is not already at minimum
-func (m *AlphaMenu) DecX() {
+//DecRow decrements the selectedRow index provided it is not already at minimum
+func (m *AlphaMenu) DecRow() {
 	minIndex := 0
-	if *m.SelectedX > minIndex {
-		*m.SelectedX--
+	if *m.SelectedRow > minIndex {
+		*m.SelectedRow--
 	}
 }
 
-//IncY increments the selected Y index provided it is not already at maximum
-func (m *AlphaMenu) IncY() {
-	maxIndex :=  len(m.CharList)/ m.CharsPerRow 
+//IncCol increments the selectedCol index provided it is not already at maximum
+func (m *AlphaMenu) IncCol() {
+	maxIndex := m.CharsPerRow - 1
 
-	//TO DO 
-	//charsOnFinalRow := len(m.CharList)% m.CharsPerRow 
+	//TO DO
 	// are we on the second last row?
 	// if so check can go down and go down if possible
 
-	if *m.SelectedY < maxIndex {
-		*m.SelectedY++
+	if *m.SelectedCol < maxIndex {
+		*m.SelectedCol++
 	}
 }
 
-//DecY decrements the selected X index provided it is not already at minimum
-func (m *AlphaMenu) DecY() {
+//DecCol decrements the selectedCol index provided it is not already at minimum
+func (m *AlphaMenu) DecCol() {
 	minIndex := 0
-	if *m.SelectedY > minIndex {
-		*m.SelectedY--
+	if *m.SelectedCol > minIndex {
+		*m.SelectedCol--
 	}
+}
+
+func charListToCharGrid(charList string, lineLength int) (foo [][]CharBox) {
+	charGrid := [][]CharBox{}
+	lines := splitIntoLines(charList, lineLength)
+	for _, line := range lines {
+
+		row := []CharBox{}
+
+		for _, char := range line {
+
+			charBox := CharBox{
+				Char: string(char),
+			}
+			row = append(row, charBox)
+		}
+		charGrid = append(charGrid, row)
+	}
+	return charGrid
+}
+
+func initGrid(grid [][]CharBox, width, height int) [][]CharBox {
+	for y, row := range grid {
+		for x := range row {
+			img, _ := ebiten.NewImage(width, height, ebiten.FilterNearest)
+			grid[y][x].image = img
+			grid[y][x].TxtX = 6
+			grid[y][x].TxtY = 14
+		}
+	}
+	return grid
+}
+
+func splitIntoLines(s string, lineLength int) []string {
+
+	runeList := []rune(s)
+	lines := []string{}
+	line := ""
+
+	for i, r := range runeList {
+		line = line + string(r)
+
+		if i > 0 && (i+1)%lineLength == 0 || i == len(s)-1 {
+			lines = append(lines, line)
+			line = ""
+		}
+	}
+	return lines
 }

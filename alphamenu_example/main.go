@@ -23,16 +23,16 @@ func update(screen *ebiten.Image) error {
 	alphaMenu.Draw(screen)
 
 	if inpututil.IsKeyJustPressed(ebiten.KeyUp) {
-		alphaMenu.DecY()
+		alphaMenu.DecRow()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyDown) {
-		alphaMenu.IncY()
+		alphaMenu.IncRow()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyRight) {
-		alphaMenu.IncX()
+		alphaMenu.IncCol()
 	}
 	if inpututil.IsKeyJustPressed(ebiten.KeyLeft) {
-		alphaMenu.DecX()
+		alphaMenu.DecCol()
 	}
 
 	return nil
