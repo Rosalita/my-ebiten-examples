@@ -8,25 +8,25 @@ import (
 
 func TestCharListToCharGrid(t *testing.T) {
 
-	oneRow := [][]CharBox{
-		[]CharBox{
-			CharBox{Char: "a"}, CharBox{Char: "b"}, CharBox{Char: "c"},
+	oneRow := [][]CharItem{
+		[]CharItem{
+			{Char: "a"}, {Char: "b"}, {Char: "c"},
 		},
 	}
 
-	twoRows := [][]CharBox{
-		[]CharBox{
-			CharBox{Char: "a"}, CharBox{Char: "b"}, CharBox{Char: "c"},
+	twoRows := [][]CharItem{
+		[]CharItem{
+			{Char: "a"}, {Char: "b"}, {Char: "c"},
 		},
-		[]CharBox{
-			CharBox{Char: "d"}, CharBox{Char: "e"},
+		[]CharItem{
+			{Char: "d"}, {Char: "e"},
 		},
 	}
 
 	tests := []struct {
 		charList   string
 		lineLength int
-		result     [][]CharBox
+		result     [][]CharItem
 	}{
 		{"abc", 3, oneRow},
 		{"abcde", 3, twoRows},
@@ -61,29 +61,29 @@ func TestSplitIntoLines(t *testing.T) {
 
 func TestInitGrid(t *testing.T) {
 
-	grid := [][]CharBox{
-		[]CharBox{
-			CharBox{Char: "a"}, CharBox{Char: "b"}, CharBox{Char: "c"},
+	grid := [][]CharItem{
+		[]CharItem{
+			{Char: "a"}, {Char: "b"}, {Char: "c"},
 		},
-		[]CharBox{
-			CharBox{Char: "d"}, CharBox{Char: "e"},
+		[]CharItem{
+			{Char: "d"}, {Char: "e"},
 		},
 	}
 
-	expected := [][]CharBox{
-		[]CharBox{
-			CharBox{Char: "a"}, CharBox{Char: "b"}, CharBox{Char: "c"},
+	expected := [][]CharItem{
+		[]CharItem{
+			{Char: "a"}, {Char: "b"}, {Char: "c"},
 		},
-		[]CharBox{
-			CharBox{Char: "d"}, CharBox{Char: "e"},
+		[]CharItem{
+			{Char: "d"}, {Char: "e"},
 		},
 	}
 
 	tests := []struct {
-		grid   [][]CharBox
+		grid   [][]CharItem
 		width  int
 		height int
-		result [][]CharBox
+		result [][]CharItem
 	}{
 		{grid, 10, 20, expected},
 	}
