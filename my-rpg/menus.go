@@ -1,8 +1,8 @@
 package main
 
 import (
-	im "github.com/Rosalita/my-ebiten/pkgs/imagemenu"
-	lm "github.com/Rosalita/my-ebiten/pkgs/listmenu"
+	im "github.com/Rosalita/ebiten-pkgs/imagemenu"
+	lm "github.com/Rosalita/ebiten-pkgs/listmenu"
 	"github.com/Rosalita/my-ebiten/resources/avatars"
 	"github.com/Rosalita/my-ebiten/resources/ui"
 )

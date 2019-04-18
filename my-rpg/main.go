@@ -7,8 +7,8 @@ import (
 	"log"
 	"os"
 
-	im "github.com/Rosalita/my-ebiten/pkgs/imagemenu"
-	lm "github.com/Rosalita/my-ebiten/pkgs/listmenu"
+	im "github.com/Rosalita/ebiten-pkgs/imagemenu"
+	lm "github.com/Rosalita/ebiten-pkgs/listmenu"
 	"github.com/Rosalita/my-ebiten/resources/my_img"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil" // required for debug text
