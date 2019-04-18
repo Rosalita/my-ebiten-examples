@@ -33,7 +33,7 @@ func initMenus() {
 		Tx:                 24,
 		Ty:                 24,
 		Offy:               40,
-		DefaultSelBGColour: pink,
+		DefaultSelBgColour: pink,
 		Items:              mainMenuItems,
 	}
 
@@ -63,7 +63,7 @@ func initMenus() {
 		Tx:                 24,
 		Ty:                 24,
 		Offy:               40,
-		DefaultSelBGColour: pink,
+		DefaultSelBgColour: pink,
 		Items:              optionsMenuItems,
 	}
 
