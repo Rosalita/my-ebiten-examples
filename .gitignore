@@ -1,0 +1,11 @@
+# Compiled Source #
+###################
+
+*.exe
+colours_and_squares/colours_and_squares
+hello_world/hello_world
+inputs/inputs
+my-rpg/my-rpg
+state/state
+
+

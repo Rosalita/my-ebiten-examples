@@ -9,7 +9,7 @@ import (
 
 	im "github.com/Rosalita/ebiten-pkgs/imagemenu"
 	lm "github.com/Rosalita/ebiten-pkgs/listmenu"
-	"github.com/Rosalita/my-ebiten/resources/my_img"
+	"github.com/Rosalita/my-ebiten-examples/resources/my_img"
 	"github.com/hajimehoshi/ebiten"
 	"github.com/hajimehoshi/ebiten/ebitenutil" // required for debug text
 	"github.com/hajimehoshi/ebiten/inpututil"  // required for isKeyJustPressed

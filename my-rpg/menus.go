@@ -3,8 +3,8 @@ package main
 import (
 	im "github.com/Rosalita/ebiten-pkgs/imagemenu"
 	lm "github.com/Rosalita/ebiten-pkgs/listmenu"
-	"github.com/Rosalita/my-ebiten/resources/avatars"
-	"github.com/Rosalita/my-ebiten/resources/ui"
+	"github.com/Rosalita/my-ebiten-examples/resources/avatars"
+	"github.com/Rosalita/my-ebiten-examples/resources/ui"
 )
 
 func initMenus() {
@@ -29,7 +29,7 @@ func initMenus() {
 
 	mainMenuInput := lm.Input{
 		Width:              140,
-		Height:             36,
+		ItemHeight:         36,
 		Tx:                 24,
 		Ty:                 24,
 		Offy:               40,
@@ -59,7 +59,7 @@ func initMenus() {
 
 	optionsMenuInput := lm.Input{
 		Width:              140,
-		Height:             36,
+		ItemHeight:         36,
 		Tx:                 24,
 		Ty:                 24,
 		Offy:               40,
